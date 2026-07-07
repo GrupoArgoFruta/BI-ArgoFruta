@@ -1,0 +1,37 @@
+CREATE OR REPLACE FUNCTION         FUN_ARG_VLRETIQSRV(
+  p_codigo        IN  AD_MONTPALLET.NROUNICO%TYPE
+  
+) RETURN NUMBER DETERMINISTIC IS
+  v_valor NUMBER;
+  p_data DATE;
+  p_codmat INTEGER;
+  P_codsrv INTEGER;
+  v_valormat NUMBER;
+  v_valorsrv NUMBER;
+BEGIN
+	
+  SELECT PAL.DTPALETIZACAO,PAL.NROETIQ,PAL.NROSRV  INTO p_data,p_codmat,P_codsrv 
+  FROM AD_MONTPALLET PAL
+  WHERE NROUNICO = p_codigo;
+ 
+  SELECT VLRMAT INTO v_valormat
+  FROM AD_MATPALLETITE
+  WHERE NROUNICO = p_codmat
+    AND p_data BETWEEN DTINI AND DTFIN;
+
+   SELECT VLRSRV INTO v_valorsrv
+  FROM AD_SRVPALLETITE 
+  WHERE NROUNICO = P_codsrv
+    AND p_data BETWEEN DTINI AND DTFIN;  
+
+  v_valor:=v_valorsrv+v_valormat;
+ 
+  RETURN v_valor;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 0; -- Ou pode optar por lançar um erro específico
+  WHEN OTHERS THEN
+    -- Tratamento de outros erros
+    RETURN NULL;
+END FUN_ARG_VLRETIQSRV;
+/

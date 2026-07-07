@@ -1,0 +1,249 @@
+    select
+        CODEMP,
+        
+       DTNEG,
+        
+       NUNOTA,
+        
+       SEQUENCIA,
+        
+       CODPROD,
+        
+       DESCRPROD,
+        
+       CODPROJ,
+        
+       PROCESSO,
+        
+       VLRTOT,
+        
+       VLRNOTA,
+        
+       VLRUNIT,
+        
+       CODNAT
+  
+    from
+        (SELECT
+            c.codemp,
+            
+               c.dtneg,
+            
+               c.nunota,
+            
+               i.sequencia,
+            
+               p.codprod,
+            
+               p.descrprod,
+            
+               c.codproj,
+            
+               prj.IDENTIFICACAO processo,
+            
+               i.vlrtot,
+            
+               C.VLRNOTA,
+            
+               i.vlrunit,
+            
+               C.CODNAT
+          
+        FROM
+            TGFCAB c
+         
+        INNER JOIN
+            TGFITE i
+            
+                ON i.nunota = c.nunota
+         
+        INNER JOIN
+            TGFPRO p
+            
+                ON p.codprod = i.codprod
+         
+        INNER JOIN
+            tcsprj prj
+            
+                ON prj.codproj = c.codproj
+         
+        WHERE
+            c.tipmov = 'C'
+           
+            AND p.usoprod = 'S'
+           
+            AND c.codproj <> 0
+           
+            AND NOT EXISTS (
+                SELECT
+                    'X'
+                  
+                FROM
+                    TGFRAT r
+                 
+                WHERE
+                    r.ORIGEM = 'E'
+                   
+                    AND r.NUFIN = c.nunota
+            )
+        --   
+            and prj.IDENTIFICACAO = 'AM236/2023'
+        --
+            AND prj.identificacao = 'AAV184/2023'
+
+        UNION
+
+        SELECT
+                c.codemp,
+                
+               c.dtneg,
+                
+               c.nunota,
+                
+               i.sequencia,
+                
+               p.codprod,
+                
+               p.descrprod,
+                
+               TGFRAT.CODPROJ,
+                
+               prj.IDENTIFICACAO processo,
+                
+               CASE 
+                    WHEN i.AD_CODPROJ IS NULL THEN ((i.vlrtot * TGFRAT.percrateio) / 100) 
+                    ELSE i.vlrtot 
+                end ,
+                
+               CASE 
+                    WHEN i.AD_CODPROJ IS NULL THEN ((C.VLRNOTA * TGFRAT.percrateio) / 100) 
+                    ELSE C.VLRNOTA 
+                end,
+                
+               CASE 
+                    WHEN i.AD_CODPROJ IS NULL THEN ((i.vlrunit * TGFRAT.percrateio) / 100) 
+                    ELSE i.vlrunit 
+                END,
+                
+               C.CODNAT 
+          
+            FROM
+                TGFRAT
+          
+            left join
+                (
+                    SELECT
+                        DESCRCENCUS,
+                        CODCENCUS 
+                    FROM
+                        TSICUS
+                ) CentroResultado
+            
+                    ON (
+                        TGFRAT.CODCENCUS = CentroResultado.CODCENCUS
+                    )
+          
+            left join
+                (
+                    SELECT
+                        DESCRNAT,
+                        CODNAT 
+                    FROM
+                        TGFNAT
+                ) Natureza
+            
+                    ON (
+                        TGFRAT.CODNAT = Natureza.CODNAT
+                    )
+          
+            left join
+                (
+                    SELECT
+                        NOMEPARC,
+                        CODPARC 
+                    FROM
+                        TGFPAR
+                ) Parceiro
+            
+                    ON (
+                        TGFRAT.CODPARC = Parceiro.CODPARC
+                    )
+          
+            left join
+                (
+                    SELECT
+                        CODCTACTB,
+                        DESCRCTA 
+                    FROM
+                        TCBPLA
+                ) PlanoContaEmpresa
+            
+                    ON (
+                        TGFRAT.CODCTACTB = PlanoContaEmpresa.CODCTACTB
+                    )
+          
+            left join
+                (
+                    SELECT
+                        CODPROJ,
+                        IDENTIFICACAO 
+                    FROM
+                        TCSPRJ
+                ) Projeto
+            
+                    ON (
+                        TGFRAT.CODPROJ = Projeto.CODPROJ
+                    )
+          
+            left join
+                (
+                    SELECT
+                        NOMESITE,
+                        CODSITE 
+                    FROM
+                        TGFSIT
+                ) Site
+            
+                    ON (
+                        TGFRAT.CODSITE = Site.CODSITE
+                    )
+         
+            inner join
+                TGFCAB c
+            
+                    ON TGFRAT.NUFIN = c.nunota
+           
+                    AND TGFRAT.ORIGEM = 'E'
+         
+            INNER JOIN
+                TGFITE i
+            
+                    ON i.nunota = c.nunota
+           
+                    AND (
+                        i.AD_CODPROJ = Projeto.CODPROJ 
+                        OR i.AD_CODPROJ IS NULL
+                    )
+         
+            INNER JOIN
+                TGFPRO p
+            
+                    ON p.codprod = i.codprod
+         
+            INNER JOIN
+                tcsprj prj
+            
+                    ON prj.codproj = TGFRAT.CODPROJ
+         
+            WHERE
+                c.tipmov = 'C'
+           
+                AND p.usoprod = 'S'
+           
+                AND c.codproj <> 0
+            )
+ 
+        where
+            codproj <> 0
+   
+            and descrprod not like '%FRETE%'

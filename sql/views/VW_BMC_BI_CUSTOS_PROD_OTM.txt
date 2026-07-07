@@ -1,0 +1,199 @@
+    WITH base AS (
+    SELECT
+
+        cent.codemp,
+
+        cent.nunota,
+
+        cent.dtneg,
+
+        cent.dtentsai,
+
+        cent.tipmov,
+
+        cent.codtipoper,
+
+        ient.codprod,
+
+        ient.controle,
+
+        ient.vlrunit,
+
+        ient.vlrtot,
+
+        pent.descrprod,
+
+        NVL(pent.AD_USACLASSIFICACAO,
+        'N') AS usa_classif,
+
+        pent.USOPROD,
+
+        NVL(pent.AD_CUSTOSCOLHEITA,
+        'N') AS ad_colheita,
+
+        NVL(pent.AD_CUSTOSDIRETO,
+        'N') AS ad_direto,
+
+        NVL(pent.AD_CUSTOSSERVICOS,
+        'N') AS ad_servico,
+
+        NVL(pent.AD_CUSTOSOPERACAO,
+        'N') AS ad_operacao,
+
+        mp.codprodutor,
+
+        mp.lote AS lotemp,
+
+        mp.qtd,
+
+        NVL(MP.CALIBREORI,
+        mp.calibre) AS calibremp,
+
+        mp.mercprod AS mercprodmp,
+
+        mp.nrounico,
+
+        NVL(ient.ad_qtdneg_ger,
+        ient.qtdneg) AS qtdneg_calc,
+
+        -- Pré-calcula o parâmetro do preço entrada
+        CASE
+            WHEN NVL(pent.AD_USACLASSIFICACAO,
+            'N') = 'S'
+             THEN  NVL(MP.CALIBREORI,
+            mp.calibre)
+
+            ELSE mp.MERCPROD
+
+        END AS param_preco
+
+    FROM
+        tgfcab cent
+
+    INNER JOIN
+        tgfite ient
+            ON ient.nunota = cent.nunota
+
+    INNER JOIN
+        tgfpro pent
+            ON pent.codprod = ient.codprod
+
+    INNER JOIN
+        ad_montpallet pal
+            ON cent.ad_nropallete = pal.nrounico
+
+    INNER JOIN
+        ad_montpalletite mp
+            ON mp.nrounico = pal.nrounico
+
+            AND mp.nunotabase = cent.nunota
+),
+
+custos AS (
+    SELECT
+
+        b.*,
+
+        NVL(b.qtdneg_calc,
+        0) AS qtdneg,
+
+        FU_BMC_GETPRECOENTRADA(b.nunota,
+        b.codprod,
+        b.param_preco) AS precocomcalibre,
+
+        obtemcusto4(b.codprod,
+        b.controle,
+        b.codemp,
+        0,
+        b.dtentsai,
+        3) AS precocusto
+
+    FROM
+        base b
+)
+SELECT
+    codemp,
+
+    nunota,
+
+    dtneg,
+
+    codprod,
+
+    descrprod,
+
+    controle,
+
+    vlrunit,
+
+    vlrtot,
+
+    qtd,
+
+    lotemp,
+
+    qtdneg,
+
+    codprodutor,
+
+    -- Custo simples
+    NVL(precocusto,
+    vlrunit) * qtdneg AS vlrcusto,
+
+    NVL(precocusto,
+    vlrunit)  AS vlrcustounit,
+
+    -- Custo com calibre (COALESCE é mais eficiente que CASE aninhado)
+    COALESCE(NULLIF(precocomcalibre,
+        0),
+        NULLIF(precocusto,
+        0),
+        vlrunit) * qtdneg AS vlrcustocalibre,
+
+    COALESCE(NULLIF(precocomcalibre,
+        0),
+        NULLIF(precocusto,
+        0),
+        vlrunit)  AS vlrcustocalibreunit,
+
+    -- Custo preço entrada
+    NVL(precocomcalibre,
+        0) * qtdneg AS vlrcustoprecoentrada,
+
+    NVL(precocomcalibre,
+        0)  AS vlrcustoprecoentradaunit,
+
+    -- Flags simplificadas
+    CASE
+            WHEN codtipoper = 213 THEN 'S'
+            ELSE 'N'
+        END AS implantacaosaldo,
+
+    ad_colheita AS colheita,
+
+    CASE
+            WHEN usoprod = 'E' THEN 'S'
+            ELSE 'N'
+        END AS embalagem,
+
+    ad_direto AS direto,
+
+    ad_servico AS servico,
+
+    ad_operacao AS operacao,
+
+    CASE
+            WHEN usoprod = 'M' THEN 'S'
+            ELSE 'N'
+        END AS mp,
+
+    calibremp,
+
+    mercprodmp,
+
+    nrounico,
+
+    tipmov,
+
+    codtipoper
+FROM custos

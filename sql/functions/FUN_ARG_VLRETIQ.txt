@@ -1,0 +1,32 @@
+CREATE OR REPLACE FUNCTION         FUN_ARG_VLRETIQ(
+  p_codigo        IN  AD_MATPALLETITE.NROUNICO%TYPE
+) RETURN AD_MATPALLETITE.VLRMAT%TYPE IS
+  v_valor AD_MATPALLETITE.VLRMAT%TYPE;
+  v_valoretiq AD_MATPALLETITE.VLRMAT%TYPE;
+ -- p_data DATE;
+BEGIN
+	v_valor:=0;
+    v_valoretiq:=0;
+  /*SELECT PAL.DTPALETIZACAO INTO p_data 
+  FROM AD_MONTPALLET PAL
+  WHERE NROUNICO = p_codigo;
+ */
+  
+  SELECT obtemcusto4(am.CODPRODAD, ' ', 1, 0, am.DTFABRICACAO , 3)*nvl(pro.AD_QTDPORCX,10)
+  INTO v_valoretiq
+  FROM AD_MONTPALLET am 
+  JOIN TGFPRO PRO ON am.CODPRODAD=pro.CODPROD  
+  WHERE NROUNICO = p_codigo;
+  
+  v_valor:=v_valoretiq;
+  
+  
+  RETURN v_valor;
+EXCEPTION
+  WHEN NO_DATA_FOUND THEN
+    RETURN 0; -- Ou pode optar por lançar um erro específico
+  WHEN OTHERS THEN
+    -- Tratamento de outros erros
+    RETURN NULL;
+END FUN_ARG_VLRETIQ;
+/

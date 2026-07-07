@@ -1,0 +1,31 @@
+CREATE OR REPLACE FUNCTION         FU_BMC_GETCUSTOPREVISTO(P_CODPROJ     INT,
+                                                   P_CODPRODUTOR INT,
+                                                   P_TIPOCUSTO   VARCHAR)
+RETURN FLOAT DETERMINISTIC RESULT_CACHE RELIES_ON (AD_CUSTOSPREV) IS
+    V_VALOR FLOAT;
+
+BEGIN
+
+  /*
+  Data : 21/10/2023
+  Autor : EDMAR MIRANDA
+  */
+
+  BEGIN
+
+    select pr.VALOR
+      INTO V_VALOR
+      from AD_CUSTOSPREV pr
+     where pr.CODPROJ = P_CODPROJ
+       and (NVL(pr.codparc,P_CODPRODUTOR) = P_CODPRODUTOR)
+       and pr.TIPOCUSTO = P_TIPOCUSTO;
+
+  EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+      V_VALOR := 0;
+  END;
+
+  RETURN V_VALOR;
+
+END;
+/

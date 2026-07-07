@@ -1,0 +1,65 @@
+CREATE OR REPLACE FUNCTION         FU_BMC_GETCOMVENDA (
+    P_TIPO                 VARCHAR,
+    P_DTREF                 DATE,
+    P_CODFRUTA              INT,
+    P_CODPARCFORNECEDOR     INT,
+    P_CODGRUPOPRODVARIEDADE INT,
+    P_CODPARCCLIENTE        INT,
+    P_MERCADO              VARCHAR,
+    P_CODPROJ               INT,
+    P_CODPARCPATENTE        INT,
+    P_VLRRECEITALIQ         NUMBER,
+    P_VLRRECEITABRUTA       NUMBER,
+    P_CODPAIS               INT,
+    P_NRROMANEIO            INT
+
+) RETURN FLOAT DETERMINISTIC RESULT_CACHE RELIES_ON (AD_CONFCOMVENDA, AD_CONFCOMVENDAREG) IS
+    V_VLRCOM FLOAT;
+BEGIN
+    SELECT ROUND(
+               (PERCCOMISSAO * SINAL * (CASE
+                                          WHEN NVL(r.BASEPERCENTUAL, 'RL') = 'RL' THEN P_VLRRECEITALIQ
+                                          ELSE P_VLRRECEITABRUTA
+                                      END)) / 100,
+               2
+           ) AS VLRCOM
+           
+            
+    INTO V_VLRCOM
+    FROM AD_CONFCOMVENDA c
+    LEFT JOIN AD_CONFCOMVENDAREG r 
+        ON c.CODCONFCOMVENDA = r.CODCONFCOMVENDA
+        AND c.tipo = P_TIPO
+        AND TRUNC(P_DTREF) BETWEEN TRUNC(c.DTVIGENCIAINICIO) AND TRUNC(c.DTVIGENCIAFINAL)
+        AND (r.codfruta = P_CODFRUTA OR r.codfruta IS NULL)
+        AND (r.codproj = P_CODPROJ OR r.codproj IS NULL)
+        AND (r.CODGRUPOPROD = P_CODGRUPOPRODVARIEDADE OR r.CODGRUPOPROD IS NULL)
+        AND (r.MERCADO = P_MERCADO OR r.MERCADO IS NULL)
+        AND (r.CODPARCPATENTE = P_CODPARCPATENTE OR r.CODPARCPATENTE IS NULL)
+        AND (r.codparcfornecedor = P_CODPARCFORNECEDOR OR r.codparcfornecedor IS NULL)
+        AND (r.CODPARCCLIENTE = P_CODPARCCLIENTE OR r.CODPARCCLIENTE IS NULL)
+        AND (r.CODPAIS = P_CODPAIS OR r.CODPAIS IS NULL)
+        AND (r.NRROMANEIO = P_NRROMANEIO OR r.NRROMANEIO IS NULL)
+    ORDER BY
+        CASE -- Numeração das regras de negócio, da mais específica para a mais geral
+               WHEN r.codfruta IS NOT NULL AND r.CODPAIS IS NOT NULL THEN 0
+               WHEN r.codfruta IS NOT NULL AND r.codproj IS NOT NULL THEN 1
+               WHEN r.codfruta IS NOT NULL AND r.codparcfornecedor IS NOT NULL THEN 2
+               WHEN r.codfruta IS NOT NULL AND r.NRROMANEIO IS NOT NULL THEN 3
+               WHEN r.codfruta IS NOT NULL AND r.CODGRUPOPROD IS NOT NULL THEN 4
+               WHEN r.codfruta IS NOT NULL AND r.CODPARCCLIENTE IS NOT NULL THEN 5
+               WHEN r.codfruta IS NOT NULL AND r.CODPARCPATENTE IS NOT NULL THEN 6
+               WHEN r.codfruta IS NOT NULL AND r.MERCADO IS NOT NULL THEN 7
+               WHEN r.codfruta IS NOT NULL AND r.MERCADO IS NOT NULL AND r.CODGRUPOPROD = P_CODGRUPOPRODVARIEDADE THEN 8
+               WHEN r.codfruta IS NOT NULL AND r.codproj= P_CODPROJ AND r.CODGRUPOPROD = P_CODGRUPOPRODVARIEDADE AND r.codparcfornecedor = P_CODPARCFORNECEDOR THEN 9
+               ELSE 10 
+           END, -- Ordenar pela numeração da regra para priorizar
+        PERCCOMISSAO ASC  -- Ordenar pela comissão para obter o menor valor em caso de empate
+    FETCH FIRST 1 ROW ONLY; -- Traz apenas a primeira linha
+
+    RETURN COALESCE(V_VLRCOM, 0); -- Retorna 0 se não encontrar resultados
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        RETURN 0;
+END;
+/

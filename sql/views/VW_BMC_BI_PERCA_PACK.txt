@@ -1,0 +1,34 @@
+    SELECT
+        c.nunota,
+
+       c.dtneg,
+
+       I.CODPROD,
+
+       I.CONTROLE,
+
+       i.codlocalorig,
+
+       i.QTDNEG,
+
+       i.VLRUNIT,
+
+       i.vlrtot
+
+    FROM
+        TGFCAB C
+
+    INNER JOIN
+        TGFITE I
+
+            ON I.NUNOTA = C.NUNOTA
+
+    INNER JOIN
+        TGFNAT N
+
+            ON N.CODNAT = C.CODNAT
+
+    WHERE
+        C.CODTIPOPER = 500
+
+        AND N.CODNAT LIKE '212%'

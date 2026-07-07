@@ -27,6 +27,20 @@ Reescrita da V9 (alavanca 4.a): não iniciada. É onde estão os ~17 min. Depend
 ➡️ Próximo passo recomendado
 Congelar a VW_NOTAS_31 (com MATERIALIZE repostos), rodar a reconciliação da pendência 2 uma vez, e mover o foco para a reescrita da V9 — único item que ataca a maior fatia dos 30 min.
 
+## LOG DE PROGRESSO — 07/07/2026
+Rodada de rastreamento de dependências (não é otimização de performance): trazer e documentar objetos [EXTERNO] que a V9 chama, listados na Seção Final de docs/STACK_MARGEM_BI.md.
+✅ Confirmado (trazido e documentado) — grupo 🔴 completo
+5 views de custo/frete/portuária/provisão: VW_BMC_BI_CUSTOS_PROD_OTM (a mais crítica — ficha de custo por pallet), VW_BMC_BI_PERCA_PACK, VW_BMC_FRETE_MARITIMO, VW_BMC_DESPESAS_PORTUARIAS, VW_BMC_BI_PROV_FORNECEDORES — corpo real trazido do DBExplorer (Sankhya Om) e documentado com seção completa de 13 partes em docs/STACK_MARGEM_BI.md (Objetos 13 a 17).
+9 das 9 functions de cálculo documentadas com seção completa de 13 partes (Objetos 4 a 12): FU_BMC_GETPROVFORN, FU_BMC_GETROYALTIES, FU_BMC_GETCOMVENDA, FU_BMC_GETPERCCOMVENDA, FU_BMC_GETCUSTOPREVISTO, FU_BMC_PRECO_CUSTO_GER, FU_ARG_TXADM_CUSTO_GER, FUN_ARG_VLRETIQSRV, FUN_ARG_VLRETIQ.
+FU_BMC_PRECO_CUSTO_GER — corpo corrigido: o arquivo original continha, por engano, o corpo de FU_BMC_GETCUSTOPREVISTO (copy/paste errado ao extrair do DBExplorer). Recopiado direto do Sankhya (Functions → FU_BMC_PRECO_CUSTO_GER) e confirmado: é irmã de FU_ARG_TXADM_CUSTO_GER, mesma tabela de config (AD_CUSTOGER/AD_CUSTOGERITE), retorna PRECO em vez de TXADM.
+Padronizado sql/procedures/README.md e sql/views/README.md (e criado sql/functions/README.md) com a mesma lista de 13 seções obrigatórias, na mesma ordem — antes cada um citava uma lista diferente (ou nenhuma).
+⚠️ Pendências abertas (não tratar como concluído)
+obtemcusto4 (function utilitária padrão Sankhya, chamada por FUN_ARG_VLRETIQ e por VW_BMC_BI_CUSTOS_PROD_OTM) e FU_BMC_GETPRECOENTRADA (chamada por VW_BMC_BI_CUSTOS_PROD_OTM) — identificadas como dependências [EXTERNO] durante a documentação; corpo não trazido, comportamento é caixa-preta parcial no cálculo de custo de etiqueta e de ficha de custo.
+[VALIDAR] VW_BMC_FRETE_MARITIMO aplica o rateio de TGFRAT sempre (incondicional); VW_BMC_DESPESAS_PORTUARIAS só aplica quando o item não tem projeto próprio (condicional). Não está confirmado se essa diferença entre as duas views irmãs é intencional ou uma divergência não documentada — ver Objetos 15 e 16, Pontos críticos.
+[VALIDAR] Relação entre VW_BMC_BI_PROV_FORNECEDORES (provisão "lançada"/contábil, lote 34 de TCBLAN) e FU_BMC_GETPROVFORN (provisão "calculada"/automática) não está clara — não é óbvio pela V9 já documentada se uma fonte substitui a outra ou se são somadas. Precisa confirmar com quem manteve a V9.
+➡️ Próximo passo recomendado
+Esclarecer os 2 pontos [VALIDAR] acima com o time funcional (rateio condicional vs. incondicional; relação entre as duas fontes de provisão de fornecedor) antes de qualquer otimização que mexa nessas views. Para trazer mais objetos, seguir para o grupo 🟠 (views de quantidade/devolução/financeiro) listado na Seção Final de docs/STACK_MARGEM_BI.md.
+
 Limitações desta análise (importante):
 
 Índices: dicionário real disponível (dump de all_ind_columns, rev. deste documento). As seções 3 (Índices) foram validadas contra o dicionário — os índices existentes estão marcados como fato; apenas o que ainda falta criar aparece como recomendação.

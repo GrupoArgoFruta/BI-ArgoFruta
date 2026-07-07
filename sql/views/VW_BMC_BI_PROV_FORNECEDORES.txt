@@ -1,0 +1,25 @@
+    SELECT
+        tc.codemp,
+        
+       tc.referencia,
+        
+       tc.codctactb,
+        
+       tc.numlanc,
+        
+       tc.CODCENCUS,
+        
+       TC.TIPLANC,
+        
+       (DECODE(TC.TIPLANC,
+        'R',
+        TC.VLRLANC * -1,
+        TC.VLRLANC)) vlrref
+  
+    FROM
+        TCBLAN tc
+ 
+    WHERE
+        TC.NUMLOTE = 34
+   
+        AND tc.CODCENCUS <> 0

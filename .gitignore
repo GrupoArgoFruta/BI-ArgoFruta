@@ -11,6 +11,3 @@ application-local.properties
 *.pem
 *.key
 service-account*.json
-
-# Config local do Claude Code — não sobe pro repositório da empresa
-.claude/
