@@ -258,6 +258,7 @@ Pós-4.a: um HASH JOIN único contra a agregação por pallet → colapsa N aces
 | Complexidade (10=pior) | 10 |
 
 ## OBJETO 3 — VW_BMC_BI_CUSTOS_PROD_OTM
+Corpo real trazido e confirmado em 07/07/2026 (sql/views/VW_BMC_BI_CUSTOS_PROD_OTM.txt; documentação completa em docs/STACK_MARGEM_BI.md, Objeto 13) — a análise abaixo, feita antes de trazer o arquivo, bateu com o código real.
 ### 1. Análise geral
 Objetivo: ficha de custo por pallet (fonte das correlacionadas da V9).
 Complexidade: média (CTE base+custos, 2 funções escalares por linha).

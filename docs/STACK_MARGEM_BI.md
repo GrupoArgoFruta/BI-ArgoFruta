@@ -464,7 +464,7 @@ Views:
 | View | VW_BMC_GET_QTD_DEV_VENDA | Devolução por item/sequência | ✖ [EXTERNO] |
 | View | VW_BMC_GET_QTD_DEV_VENDA_FOR | Devolução por fornecedor | ✖ [EXTERNO] |
 | View | VW_BMC_GET_QTD_DEV_VENDA2 | Devolução por romaneio | ✖ [EXTERNO] |
-| View | VW_BMC_BI_PROV_FORNECEDORES | Provisão de fornecedor | ✖ [EXTERNO] |
+| View | VW_BMC_BI_PROV_FORNECEDORES | Provisão de fornecedor | ✔ Sim (Objeto 17) |
 | View | VW_TGFCAB_ITE | Cabeçalho+item (pedidos frete/log) | ✖ [EXTERNO] |
 | View | VW_PERCPROC_NF_V4 | % rateio processo/NF | ✖ [EXTERNO] |
 | View | VW_AD_REC_COMD | Valor em aberto (OPEN_AMOUNT) | ✖ [EXTERNO] |
@@ -476,7 +476,7 @@ Views:
 | Function | F_DESCROPC | Descrição de opção (TIPOPARCERIA) — Sankhya padrão | ✖ padrão |
 
 ### 8. Objetos chamados
-Views/MViews [EXTERNO]: as 12 listadas acima (VW_BMC_GET_QTD_DEV_VENDA, ..._FOR, ...2, VW_BMC_BI_PROV_FORNECEDORES, VW_TGFCAB_ITE, VW_PERCPROC_NF_V4, VW_AD_REC_COMD, VW_ARG_CRE_DEB, VW_DESCFIN, VW_ARG_DEB_CRE_ITE, VW_M_CUSTOMED_SEMANA, VW_TGFPARC_TGFEMP).
+Views/MViews ainda [EXTERNO]: 11 (VW_BMC_GET_QTD_DEV_VENDA, ..._FOR, ...2, VW_TGFCAB_ITE, VW_PERCPROC_NF_V4, VW_AD_REC_COMD, VW_ARG_CRE_DEB, VW_DESCFIN, VW_ARG_DEB_CRE_ITE, VW_M_CUSTOMED_SEMANA, VW_TGFPARC_TGFEMP). VW_BMC_BI_PROV_FORNECEDORES já trazida e documentada (Objeto 17).
 Functions: F_DESCROPC (Sankhya).
 Tabelas: todas as das tabelas Sankhya + customizadas listadas na Seção 7.
 ### 9. Objetos que provavelmente dependem desta view
@@ -492,7 +492,7 @@ VW_NOTAS_31
 
    │     VW_BMC_GET_QTD_DEV_VENDA / _FOR / _2    [EXTERNO]
 
-   │     VW_BMC_BI_PROV_FORNECEDORES             [EXTERNO]
+   │     VW_BMC_BI_PROV_FORNECEDORES             (Objeto 17)
 
    │     AD_TGFGRUPATENTES, AD_ROMANEIOENTR,
 

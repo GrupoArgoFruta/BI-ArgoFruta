@@ -51,9 +51,9 @@ A lista de pontos críticos conhecidos (publicação não atômica, ausência de
 
 ## 6. Documentar e versionar
 
-- Atualizar a seção do objeto em `docs/` usando a mesma estrutura já estabelecida (Resumo, Fluxo de execução, Entradas, Saídas, Regras de negócio, Cálculos, Dependências, Objetos chamados, Pontos críticos, Sugestões de melhoria, Resumo executivo).
+- Atualizar a seção do objeto em `docs/` usando a mesma estrutura de 13 partes já estabelecida (Resumo, Fluxo de execução, Entradas, Saídas, Regras de negócio, Cálculos, Dependências, Objetos chamados, Objetos que provavelmente dependem deste objeto, Diagrama textual de dependências, Pontos críticos, Sugestões de melhoria, Resumo executivo).
 - Adicionar uma entrada datada no "LOG DE PROGRESSO" (`docs/REVISAO_TECNICA_STACK_MARGEM_BI.md`) distinguindo `✅ Confirmado` de `⚠️ Pendência`.
-- Colocar o `.sql` correspondente em `sql/procedures/` ou `sql/views/` com o nome exato do objeto Oracle.
+- Colocar o `.sql` correspondente em `sql/procedures/`, `sql/views/` ou `sql/functions/` com o nome exato do objeto Oracle.
 - Seguir a convenção de commit do projeto: `tipo(#N): descrição`. Não commitar — quem commita é o usuário.
 
 ## 7. Automação nova (scripts/pipelines, incluindo futuro GCP)

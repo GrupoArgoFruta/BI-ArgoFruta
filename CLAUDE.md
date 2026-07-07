@@ -30,9 +30,12 @@ docs/
 sql/
   procedures/*.sql   — corpo real (CREATE OR REPLACE) de cada procedure Sankhya
   views/*.sql        — corpo real de cada view Sankhya
-.claude/skills/
+  functions/*.sql    — corpo real de cada function Sankhya
+skills/
   bi-impact-check/   — checklist obrigatório antes de mexer em algo que alimenta o BI
 ```
+
+Nota: `skills/` fica na raiz do repo (não em `.claude/`) para ficar visível/versionado igual ao resto — isso significa que o Claude Code não descobre esse skill sozinho via slash-command; ele precisa ser lido manualmente (`skills/bi-impact-check/SKILL.md`) quando a tarefa pedir.
 
 Arquivo `.sql` em `sql/` sem a seção correspondente em `docs/` (ou vice-versa) é considerado documentação desatualizada — ver regra obrigatória abaixo.
 
