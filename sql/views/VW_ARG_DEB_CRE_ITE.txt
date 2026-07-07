@@ -1,0 +1,310 @@
+    SELECT
+	CODPROJ,
+	PROJETO,
+	CODPROD,
+	CONTROLE,
+	AD_CALIBRE,
+	/*SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT
+        ELSE 0
+    END) / SUM(CASE
+        WHEN NVL(AD_QTDNEGOR,QTDNEG)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,QTDNEG)
+    END)  DB_VLRTOT,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='C' THEN VLRTOT
+            ELSE 0
+        END
+    ) /SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,QTDNEG),0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,QTDNEG)
+    END)  CR_VLRTOT,*/
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='D' THEN VLRTOT
+            ELSE 0
+        END
+    )   DB_VLRTOT,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='C' THEN VLRTOT
+            ELSE 0
+        END
+    )   CR_VLRTOT,
+	SUM(
+        VLRTOT
+    ) /SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,QTDNEG),0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,QTDNEG)
+    END) VLRTOT,
+    /*SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END) / SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,QTDNEG),0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,QTDNEG)
+    END)  DB_VLRTOTMOE,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='C' THEN VLRTOT/VLRCOT
+            ELSE 0
+        END
+    ) / SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,QTDNEG),0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,QTDNEG)
+    END)  CR_VLRTOTMOE,*/
+    SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END)  DB_VLRTOTMOE,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='C' THEN VLRTOT/VLRCOT
+            ELSE 0
+        END
+    )  CR_VLRTOTMOE,
+	SUM(
+        VLRTOT/VLRCOT
+    )/SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,QTDNEG),0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,QTDNEG)
+    END)  VLRTOTMOE,
+	AD_CRE_DEB,
+	MAX(
+        NUNOTA
+    ) NUNOTA,
+	SUM(
+        CASE
+            WHEN NVL(NVL(AD_QTDNEGOR,QTDNEG),0)=0 THEN NULL
+            ELSE NVL(AD_QTDNEGOR,QTDNEG)
+        END
+    ) QTD,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='D' THEN VLRTOT
+            ELSE 0
+        END
+    )   DB_VLRTOT1,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='C' THEN VLRTOT
+            ELSE 0
+        END
+    )   CR_VLRTOT1,
+    SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END)  DB_VLRTOTMOE1,
+	SUM(
+        CASE
+            WHEN AD_CRE_DEB='C' THEN VLRTOT/VLRCOT
+            ELSE 0
+        END
+    )  CR_VLRTOTMOE1,
+	'CT' CT_CL,
+	AD_CONSCTRL
+FROM VW_TGFCAB_ITE
+WHERE AD_CRE_DEB IN (
+        'C','D'
+    )
+AND (
+        (
+            AD_CRE_DEB  ='D'
+            AND STATUSNFE='A'
+        )
+        OR AD_CRE_DEB  ='C'
+    )
+AND AD_CONSCTRL='S'
+AND STATUSNOTA='L'
+AND NOT EXISTS (
+        SELECT
+            nunota
+        FROM
+            AD_NOTASEXC ex
+        WHERE
+            ex.nunota=VW_TGFCAB_ITE.nunota
+    )
+AND NOT EXISTS (
+        SELECT
+            CODPARC
+        FROM
+            TGFCAB SUB
+        WHERE
+            SUB.AD_NUNOTASUB= VW_TGFCAB_ITE.NUNOTA
+    )
+GROUP
+BY
+    CODPROJ,
+
+    PROJETO,
+
+	CODPROD,
+
+	CONTROLE,
+
+	AD_CRE_DEB,
+
+	AD_CALIBRE,
+
+	AD_CONSCTRL
+UNION ALL
+  SELECT
+	CODPROJ,
+
+	PROJETO,
+
+	CODPROD,
+
+	' ' CONTROLE,
+
+	AD_CALIBRE,
+
+	/*SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT
+        ELSE 0
+    END) / SUM(CASE
+        WHEN NVL(AD_QTDNEGOR,
+        QTDNEG)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END)  DB_VLRTOT,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='C' THEN VLRTOT
+        ELSE 0
+    END) /SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,
+        QTDNEG),
+        0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END)  CR_VLRTOT,
+    */
+	SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT
+        ELSE 0
+    END)   DB_VLRTOT,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='C' THEN VLRTOT
+        ELSE 0
+    END)   CR_VLRTOT,
+
+	SUM(VLRTOT) /SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,
+        QTDNEG),
+        0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END) VLRTOT,
+
+    /*SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END) / SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,
+        QTDNEG),
+        0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END)  DB_VLRTOTMOE,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='C' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END) / SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,
+        QTDNEG),
+        0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END)  CR_VLRTOTMOE,
+    */
+    SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END)  DB_VLRTOTMOE,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='C' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END)  CR_VLRTOTMOE,
+
+	SUM(VLRTOT/VLRCOT)/SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,
+        QTDNEG),
+        0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END)  VLRTOTMOE,
+
+	AD_CRE_DEB,
+
+	MAX(NUNOTA) NUNOTA,
+
+	SUM(CASE
+        WHEN NVL(NVL(AD_QTDNEGOR,
+        QTDNEG),
+        0)=0 THEN NULL
+        ELSE NVL(AD_QTDNEGOR,
+        QTDNEG)
+    END) QTD,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT
+        ELSE 0
+    END)   DB_VLRTOT1,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='C' THEN VLRTOT
+        ELSE 0
+    END)   CR_VLRTOT1,
+
+    SUM(CASE
+        WHEN AD_CRE_DEB='D' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END)  DB_VLRTOTMOE1,
+
+	SUM(CASE
+        WHEN AD_CRE_DEB='C' THEN VLRTOT/VLRCOT
+        ELSE 0
+    END)  CR_VLRTOTMOE1,
+
+	'CL' CT_CL,
+
+	AD_CONSCTRL
+FROM VW_TGFCAB_ITE
+WHERE AD_CRE_DEB IN ('C',
+    'D')
+AND ((AD_CRE_DEB  ='D'
+    AND (STATUSNFE='A'
+    OR CODTIPOPER IN (2235)))
+    OR AD_CRE_DEB  ='C')
+AND AD_CONSCTRL='C'
+AND STATUSNOTA='L'
+AND NOT EXISTS (SELECT
+        nunota
+    FROM
+        AD_NOTASEXC ex
+    WHERE
+        ex.nunota=VW_TGFCAB_ITE.nunota)
+AND NOT EXISTS (SELECT
+        CODPARC
+    FROM
+        TGFCAB SUB
+    WHERE
+        SUB.AD_NUNOTASUB= VW_TGFCAB_ITE.NUNOTA)
+GROUP
+BY
+    CODPROJ,
+
+    PROJETO,
+
+	CODPROD,
+
+	AD_CRE_DEB,
+
+	AD_CALIBRE,
+
+	AD_CONSCTRL

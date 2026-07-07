@@ -19,6 +19,15 @@ SANKHYA.VW_BMC_BI_PERCA_PACK (View)
 SANKHYA.VW_BMC_FRETE_MARITIMO (View)
 SANKHYA.VW_BMC_DESPESAS_PORTUARIAS (View)
 SANKHYA.VW_BMC_BI_PROV_FORNECEDORES (View)
+SANKHYA.VW_BMC_GET_QTD_DEV_VENDA (View)
+SANKHYA.VW_BMC_GET_QTD_DEV_VENDA_FOR (View)
+SANKHYA.VW_BMC_GET_QTD_DEV_VENDA2 (View)
+SANKHYA.VW_ARG_DEB_CRE_ITE (View)
+SANKHYA.VW_ARG_CRE_DEB (View)
+SANKHYA.VW_DESCFIN (View)
+SANKHYA.VW_PERCPROC_NF_V4 (View)
+SANKHYA.VW_TGFCAB_ITE (View)
+SANKHYA.VW_TGFPARC_TGFEMP (View)
 
 Relação entre eles (cadeia de carga):
 
@@ -461,22 +470,22 @@ Views:
 
 | Tipo | Nome | Utilização | Nos arquivos? |
 |---|---|---|---|
-| View | VW_BMC_GET_QTD_DEV_VENDA | Devolução por item/sequência | ✖ [EXTERNO] |
-| View | VW_BMC_GET_QTD_DEV_VENDA_FOR | Devolução por fornecedor | ✖ [EXTERNO] |
-| View | VW_BMC_GET_QTD_DEV_VENDA2 | Devolução por romaneio | ✖ [EXTERNO] |
+| View | VW_BMC_GET_QTD_DEV_VENDA | Devolução por item/sequência | ✔ Sim (Objeto 18) |
+| View | VW_BMC_GET_QTD_DEV_VENDA_FOR | Devolução por fornecedor | ✔ Sim (Objeto 19) |
+| View | VW_BMC_GET_QTD_DEV_VENDA2 | Devolução por romaneio | ✔ Sim (Objeto 20) |
 | View | VW_BMC_BI_PROV_FORNECEDORES | Provisão de fornecedor | ✔ Sim (Objeto 17) |
-| View | VW_TGFCAB_ITE | Cabeçalho+item (pedidos frete/log) | ✖ [EXTERNO] |
-| View | VW_PERCPROC_NF_V4 | % rateio processo/NF | ✖ [EXTERNO] |
-| View | VW_AD_REC_COMD | Valor em aberto (OPEN_AMOUNT) | ✖ [EXTERNO] |
-| View | VW_ARG_CRE_DEB | Crédito/débito por projeto (moeda) | ✖ [EXTERNO] |
-| View | VW_DESCFIN | Desconto financeiro proporcional | ✖ [EXTERNO] |
-| View | VW_ARG_DEB_CRE_ITE | Débito/crédito por item (CT/CL) | ✖ [EXTERNO] |
+| View | VW_TGFCAB_ITE | Cabeçalho+item (pedidos frete/log) | ✔ Sim (Objeto 25) |
+| View | VW_PERCPROC_NF_V4 | % rateio processo/NF | ✔ Sim (Objeto 24) |
+| View | VW_AD_REC_COMD | Valor em aberto (OPEN_AMOUNT) | ⚠ [EXTERNO] — erro no DBExplorer ao abrir ("Cannot read properties of undefined (reading 'colunas')"), não trazida ainda |
+| View | VW_ARG_CRE_DEB | Crédito/débito por projeto (moeda) | ✔ Sim (Objeto 22) |
+| View | VW_DESCFIN | Desconto financeiro proporcional | ✔ Sim (Objeto 23) |
+| View | VW_ARG_DEB_CRE_ITE | Débito/crédito por item (CT/CL) | ✔ Sim (Objeto 21) |
 | MView | VW_M_CUSTOMED_SEMANA | Custo médio semanal (também no Objeto 1) | ✖ [EXTERNO] |
-| View | VW_TGFPARC_TGFEMP | Parceiros que são empresas do grupo | ✖ [EXTERNO] |
+| View | VW_TGFPARC_TGFEMP | Parceiros que são empresas do grupo | ✔ Sim (Objeto 26) |
 | Function | F_DESCROPC | Descrição de opção (TIPOPARCERIA) — Sankhya padrão | ✖ padrão |
 
 ### 8. Objetos chamados
-Views/MViews ainda [EXTERNO]: 11 (VW_BMC_GET_QTD_DEV_VENDA, ..._FOR, ...2, VW_TGFCAB_ITE, VW_PERCPROC_NF_V4, VW_AD_REC_COMD, VW_ARG_CRE_DEB, VW_DESCFIN, VW_ARG_DEB_CRE_ITE, VW_M_CUSTOMED_SEMANA, VW_TGFPARC_TGFEMP). VW_BMC_BI_PROV_FORNECEDORES já trazida e documentada (Objeto 17).
+Views/MViews ainda [EXTERNO]: VW_M_CUSTOMED_SEMANA e VW_AD_REC_COMD (erro ao abrir no DBExplorer, ver Seção 7). Todas as demais já trazidas e documentadas: VW_BMC_GET_QTD_DEV_VENDA (Objeto 18), _FOR (Objeto 19), _2 (Objeto 20), VW_BMC_BI_PROV_FORNECEDORES (Objeto 17), VW_TGFCAB_ITE (Objeto 25), VW_PERCPROC_NF_V4 (Objeto 24), VW_ARG_CRE_DEB (Objeto 22), VW_DESCFIN (Objeto 23), VW_ARG_DEB_CRE_ITE (Objeto 21), VW_TGFPARC_TGFEMP (Objeto 26).
 Functions: F_DESCROPC (Sankhya).
 Tabelas: todas as das tabelas Sankhya + customizadas listadas na Seção 7.
 ### 9. Objetos que provavelmente dependem desta view
@@ -490,13 +499,13 @@ VW_NOTAS_31
 
    │     TGFITE, TGFCAB, AD_TGFITECOMPL          [padrão/EXTERNO]
 
-   │     VW_BMC_GET_QTD_DEV_VENDA / _FOR / _2    [EXTERNO]
+   │     VW_BMC_GET_QTD_DEV_VENDA (18) / _FOR (19) / _2 (20)
 
    │     VW_BMC_BI_PROV_FORNECEDORES             (Objeto 17)
 
    │     AD_TGFGRUPATENTES, AD_ROMANEIOENTR,
 
-   │     AD_ROMANEIOENTFAT, VW_TGFCAB_ITE        [EXTERNO]
+   │     AD_ROMANEIOENTFAT     [EXTERNO], VW_TGFCAB_ITE (Objeto 25)
 
    ├─ SELECT principal:
 
@@ -512,13 +521,13 @@ VW_NOTAS_31
 
    │     ARG_COMPRA_MP, VW_M_CUSTOMED_SEMANA
 
-   ├─ Financeiro [EXTERNO]:
+   ├─ Financeiro:
 
-   │     VW_AD_REC_COMD, VW_ARG_CRE_DEB, VW_ARG_DEB_CRE_ITE,
+   │     VW_AD_REC_COMD [EXTERNO — erro no DBExplorer], VW_ARG_CRE_DEB (22), VW_ARG_DEB_CRE_ITE (21),
 
-   │     VW_DESCFIN, VW_PERCPROC_NF_V4
+   │     VW_DESCFIN (23), VW_PERCPROC_NF_V4 (24)
 
-   └─ Filtros [EXTERNO]: AD_NOTASEXC, VW_TGFPARC_TGFEMP
+   └─ Filtros: AD_NOTASEXC [EXTERNO], VW_TGFPARC_TGFEMP (Objeto 26)
 ### 11. Pontos críticos
 ✅ COLISÃO DE ALIAS — CORRIGIDA E VALIDADA. A versão anterior reusava Q3/Q4/Q5 para dois CTEs cada, tornando as referências ambíguas. Foi resolvida renomeando os 9 CTEs para nomes semânticos — QNOTA (por nota), QCEN (por centro), QCAL (por calibre), QCTR (por controle), QFOR (por fornecedor), QPRV (provisão fornecedor), QPAT (parceiro-patente), QVAR (variedade MP), QNFMP (NF entrada MP) — com cada coluna apontando para o CTE correto (mapeamento inequívoco por nome de coluna). Equivalência funcional validada contra produção. Mantido aqui como histórico: era o item nº 1 de risco do stack.
 Datas em literal ANSI em PED_FRETE_VENDAS (DATE '2025-12-18') e PED_DESP_LOG (DATE '2026-06-01'): a view ainda "esquece" pedidos anteriores a essas datas (corte intencional), mas o formato agora é NLS-independente. Continua candidato a externalizar para tabela de parâmetro.
@@ -1104,23 +1113,361 @@ VW_BMC_BI_PROV_FORNECEDORES
 ### 13. Resumo executivo (para analista funcional)
 Traz os lançamentos manuais de provisão de fornecedor já registrados na contabilidade (lote específico do financeiro), com o sinal certo para estornos — é a "provisão de fato lançada", diferente da function que calcula quanto *deveria* ser provisionado por regra.
 
+## OBJETO 18 — SANKHYA.VW_BMC_GET_QTD_DEV_VENDA (View)
+### 1. Resumo
+Calcula quantidade e valor devolvidos (V_QTDDEV/V_VLRDEV) por item de venda original (nunotaorig/sequenciaorig), agregando via LISTAGG as notas de devolução (nunotadest) e as chaves de NFe (chavenfe) associadas. Usada por `VW_NOTAS_31` (Objeto 3) para calcular quantidade líquida de devolução e por `VW_PERCPROC_NF_V4` (Objeto 24) para excluir quantidade já devolvida do rateio.
+### 2. Fluxo de execução
+SELECT direto de TGFVAR (tabela de vínculo/variação entre nota original e nota de devolução) + TGFCAB (só notas de devolução liquidadas, tipmov='D' e STATUSNOTA='L') + TGFITE, agrupando por nota/sequência de origem. Um bloco `UNION ALL` inteiro (linhas 60+ do arquivo) está comentado (`/* ... */`) — código morto que somava devolução por uma lógica alternativa (AD_QTDNEGOR, codtipoper 2126/2127, com uma lista de NUNOTA excluídos hardcoded).
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+V_QTDDEV, V_VLRDEV, NUNOTAORIG, SEQUENCIAORIG, REFUGO ('S'/'N'), NUNOTADEST (lista concatenada), TIPO (fixo 'D'), CHAVENFE (lista concatenada).
+### 5. Regras de negócio
+- Só considera devoluções liquidadas (STATUSNOTA='L') do tipo de movimento 'D'.
+- REFUGO = 'S' quando CODTIPOPER da nota de devolução está em (1227, 1228); 'N' caso contrário — mesma faixa de tipo de operação usada em outros pontos do stack para identificar refugo/realocação (ver Objeto 2, Seção 7, dependência "TGFCAB / TGFITE / TGFVAR | Devoluções (tipoper 1227/1228)").
+- `[VALIDAR]` O bloco `UNION ALL` comentado sugere que já existiu (ou foi cogitada) uma segunda fonte de devolução baseada em CODTIPOPER 2126/2127 com uma lista de notas excluídas manualmente — não está documentado por que foi desativado nem se a lista de exclusões ainda é válida.
+### 6. Cálculos
+`V_QTDDEV = SUM(i.qtdneg)`; `V_VLRDEV = SUM(i.vlrtot)`; agregação por `nunotaorig`, `sequenciaorig`, REFUGO, `v.NUNOTA`, `c.chavenfe`.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| Tabela | TGFVAR | Vínculo nota original ↔ nota de devolução | ✖ [EXTERNO] (Sankhya padrão) |
+| Tabela | TGFCAB / TGFITE | Nota e item de devolução | ✖ [EXTERNO] (Sankhya padrão) |
+### 8. Objetos chamados
+Nenhum.
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — quantidade líquida de devolução. VW_PERCPROC_NF_V4 (Objeto 24) — exclusão de quantidade devolvida do rateio de processo.
+### 10. Diagrama textual de dependências
+VW_BMC_GET_QTD_DEV_VENDA
+
+   └─ TGFVAR / TGFCAB / TGFITE   [EXTERNO] (Sankhya padrão)
+### 11. Pontos críticos
+Bloco `UNION ALL` morto comentado no meio do arquivo — polui a leitura e mantém uma lista de exclusão de notas hardcoded (13 números de nota) sem explicação; se algum dia for reativado por engano, o comportamento muda silenciosamente.
+### 12. Sugestões de melhoria
+[VALIDAR] Remover o bloco comentado (mover para histórico em Git) se de fato está desativado definitivamente — confirmar com o time antes.
+### 13. Resumo executivo (para analista funcional)
+Descobre quanto de uma venda foi devolvido depois, olhando o vínculo entre a nota original e a(s) nota(s) de devolução — é o que permite calcular a "quantidade líquida" (vendido menos devolvido) usada no cálculo de margem.
+
+## OBJETO 19 — SANKHYA.VW_BMC_GET_QTD_DEV_VENDA_FOR (View)
+### 1. Resumo
+Variante de VW_BMC_GET_QTD_DEV_VENDA (Objeto 18) agregada também por fornecedor (CODPARC) — "por fornecedor" (FOR no nome). Usa `AD_TGFITECOMPL` em vez de `TGFITE` como fonte de item.
+### 2. Fluxo de execução
+Mesma lógica de TGFVAR + TGFCAB (devolução liquidada), mas o join de item é com `AD_TGFITECOMPL` (base de itens customizada, casada por `i.SEQITE = v.sequencia`), e o GROUP BY inclui `i.codparc`.
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+V_QTDDEV (`SUM(i.QUANTITY)`), V_VLRDEV, NUNOTAORIG, SEQUENCIAORIG, REFUGO, NUNOTADEST (lista concatenada), CODPARC.
+### 5. Regras de negócio
+Mesmas regras de vigência/liquidação de VW_BMC_GET_QTD_DEV_VENDA. Diferença: usa `AD_TGFITECOMPL.QUANTITY` (não `TGFITE.qtdneg`) e agrega por fornecedor, permitindo saber quanto foi devolvido por fornecedor específico dentro da mesma nota.
+### 6. Cálculos
+`V_QTDDEV = SUM(i.QUANTITY)`; `V_VLRDEV = SUM(i.vlrtot)`; agregado por nunotaorig, sequenciaorig, codparc, REFUGO.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| Tabela | TGFVAR / TGFCAB | Vínculo e cabeçalho de devolução | ✖ [EXTERNO] (Sankhya padrão) |
+| Tabela | AD_TGFITECOMPL | Base de itens customizada | ✖ [EXTERNO] |
+### 8. Objetos chamados
+Nenhum.
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — listada como dependência (CTE `QTDNEG_POR_FORN`).
+### 10. Diagrama textual de dependências
+VW_BMC_GET_QTD_DEV_VENDA_FOR
+
+   ├─ TGFVAR / TGFCAB       [EXTERNO] (Sankhya padrão)
+
+   └─ AD_TGFITECOMPL        [EXTERNO]
+### 11. Pontos críticos
+Mesma família de 3 views quase-idênticas (Objetos 18, 19, 20) com pequenas variações de agregação (sem dimensão extra / por fornecedor / por romaneio) — mudança de regra de negócio na devolução precisa ser replicada nas 3.
+### 12. Sugestões de melhoria
+[VALIDAR] Considerar consolidar as 3 variantes (VENDA, VENDA_FOR, VENDA2) numa única view parametrizável ou com as 3 dimensões extras já expostas, evitando manter 3 cópias da mesma lógica de devolução.
+### 13. Resumo executivo (para analista funcional)
+Mesma ideia da devolução líquida (Objeto 18), mas quebrada por fornecedor — usada quando o cálculo de margem precisa saber de qual fornecedor específico veio a mercadoria devolvida.
+
+## OBJETO 20 — SANKHYA.VW_BMC_GET_QTD_DEV_VENDA2 (View)
+### 1. Resumo
+Segunda variante de VW_BMC_GET_QTD_DEV_VENDA (Objeto 18), agregada por romaneio em vez de fornecedor.
+### 2. Fluxo de execução
+Idêntica estrutura à Objeto 19 (TGFVAR + TGFCAB + AD_TGFITECOMPL), trocando a dimensão de agregação de `codparc` para `i.romaneio`.
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+V_QTDDEV, V_VLRDEV, NUNOTAORIG, SEQUENCIAORIG, REFUGO, NUNOTADEST, ROMANEIO.
+### 5. Regras de negócio
+Mesmas regras de VW_BMC_GET_QTD_DEV_VENDA_FOR (Objeto 19), trocando a granularidade de agregação para romaneio — permite saber quanto de um romaneio (lote de colheita/entrada) específico foi devolvido.
+### 6. Cálculos
+`V_QTDDEV = SUM(i.QUANTITY)`; `V_VLRDEV = SUM(i.vlrtot)`; agregado por nunotaorig, sequenciaorig, REFUGO, romaneio.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| Tabela | TGFVAR / TGFCAB | Vínculo e cabeçalho de devolução | ✖ [EXTERNO] (Sankhya padrão) |
+| Tabela | AD_TGFITECOMPL | Base de itens customizada | ✖ [EXTERNO] |
+### 8. Objetos chamados
+Nenhum.
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — citada na Seção 5 da doc original desta view como fonte da distinção de REFUGO em devoluções (dispensa REFUGO no cálculo principal porque a distinção já vem daqui).
+### 10. Diagrama textual de dependências
+VW_BMC_GET_QTD_DEV_VENDA2
+
+   ├─ TGFVAR / TGFCAB       [EXTERNO] (Sankhya padrão)
+
+   └─ AD_TGFITECOMPL        [EXTERNO]
+### 11. Pontos críticos
+Mesmo ponto da Objeto 19 — família de 3 views quase-idênticas.
+### 12. Sugestões de melhoria
+Nenhuma além da já registrada na Objeto 19.
+### 13. Resumo executivo (para analista funcional)
+Mesma devolução líquida, agora quebrada por romaneio (lote de entrada) — permite rastrear devolução até o lote físico de origem.
+
+## OBJETO 21 — SANKHYA.VW_ARG_DEB_CRE_ITE (View)
+### 1. Resumo
+Calcula o rateio de débito/crédito por item de nota, em duas modalidades identificadas pela coluna CT_CL: 'CT' (consolidado por controle, `AD_CONSCTRL='S'`) e 'CL' (por calibre/fornecedor, `AD_CONSCTRL='C'`). É a fonte de `CD_ITE`/`CD_ITE2` citada em `VW_NOTAS_31` (Objeto 3, Seção 6 — "Rateio de débito por controle").
+### 2. Fluxo de execução
+Duas metades quase idênticas unidas por `UNION ALL`, ambas lendo de `VW_TGFCAB_ITE` (Objeto 25): a primeira filtra `AD_CONSCTRL='S'` e agrupa por CONTROLE (branch 'CT'); a segunda filtra `AD_CONSCTRL='C'` e não agrupa por controle, usando `' '` fixo (branch 'CL'). Cada metade soma valores de débito (AD_CRE_DEB='D') e crédito (AD_CRE_DEB='C') separadamente, e também converte pra moeda (dividindo por VLRCOT).
+### 3. Entradas
+Nenhum parâmetro — view direta sobre VW_TGFCAB_ITE.
+### 4. Saídas
+CODPROJ, PROJETO, CODPROD, CONTROLE, AD_CALIBRE, DB_VLRTOT, CR_VLRTOT, VLRTOT (líquido), DB_VLRTOTMOE, CR_VLRTOTMOE, VLRTOTMOE, AD_CRE_DEB, NUNOTA, QTD, DB_VLRTOT1, CR_VLRTOT1, DB_VLRTOTMOE1, CR_VLRTOTMOE1 (variantes não divididas pela quantidade), CT_CL ('CT'/'CL'), AD_CONSCTRL.
+### 5. Regras de negócio
+- Branch 'CT': exige `STATUSNFE='A'` para débito, `AD_CRE_DEB IN ('C','D')`, `AD_CONSCTRL='S'`, `STATUSNOTA='L'`, exclui notas em `AD_NOTASEXC` e notas substituídas (`AD_NUNOTASUB`). Agrupa por CODPROJ/PROJETO/CODPROD/CONTROLE/AD_CRE_DEB/AD_CALIBRE/AD_CONSCTRL.
+- Branch 'CL': mesma exclusão de `AD_NOTASEXC`/substituídas, mas a condição de débito é mais ampla (`STATUSNFE='A' OR CODTIPOPER IN (2235)`), `AD_CONSCTRL='C'`, e **não** agrupa por CONTROLE (fica `' '` fixo) — ou seja, consolida por produto/calibre, não por controle individual.
+- `VLRTOT`/`VLRTOTMOE` (sem sufixo) são o **líquido** (`SUM(VLRTOT)/SUM(quantidade)`, ou seja, uma média ponderada); `DB_VLRTOT1`/`CR_VLRTOT1` (com sufixo `1`) são os brutos, não divididos — duas granularidades coexistindo na mesma linha.
+- Comentários no código (`/* ... */`) mostram fórmulas anteriores que dividiam DB_VLRTOT/CR_VLRTOT pela quantidade — foram substituídas pela soma bruta; sinal de que essa divisão foi removida numa correção/otimização anterior.
+### 6. Cálculos
+`DB_VLRTOT = SUM(CASE WHEN AD_CRE_DEB='D' THEN VLRTOT ELSE 0 END)`; `CR_VLRTOT` análogo para 'C'; `VLRTOT = SUM(VLRTOT) / SUM(quantidade líquida)`; versões `*MOE` dividem por `VLRCOT` antes de somar.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| View | VW_TGFCAB_ITE | Fonte única de dados (nota+item já enriquecidos) | ✔ Sim (Objeto 25) |
+| Tabela | AD_NOTASEXC | Notas excluídas do BI | ✖ [EXTERNO] |
+### 8. Objetos chamados
+VW_TGFCAB_ITE (Objeto 25).
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — fonte de CD_ITE/CD_ITE2 no rateio de débito/crédito por controle e por calibre (Seção 6).
+### 10. Diagrama textual de dependências
+VW_ARG_DEB_CRE_ITE
+
+   ├─ VW_TGFCAB_ITE      (Objeto 25)
+
+   └─ AD_NOTASEXC        [EXTERNO]
+### 11. Pontos críticos
+- Duas condições de "débito válido" diferentes entre os branches ('CT' exige só STATUSNFE='A'; 'CL' também aceita CODTIPOPER=2235) — `[VALIDAR]` não está claro se essa assimetria é intencional (CODTIPOPER 2235 só se aplica ao caso calibre/fornecedor) ou uma divergência não documentada.
+- Coexistência de valores líquidos (sem sufixo) e brutos (`1`) na mesma linha exige que quem consome saiba qual usar para qual finalidade — não há comentário na view explicando a diferença.
+### 12. Sugestões de melhoria
+[VALIDAR] Documentar (comentário na view ou aqui) por que CODTIPOPER=2235 é aceito como débito válido só no branch 'CL', não no 'CT'.
+### 13. Resumo executivo (para analista funcional)
+Distribui valores de débito e crédito entre os itens de uma nota, de duas formas (por controle individual do lote, ou por produto/calibre agregado) — é uma peça do cálculo de rateio financeiro que a "planilha mestre" (VW_NOTAS_31) usa para saber quanto de crédito/débito cabe a cada item.
+
+## OBJETO 22 — SANKHYA.VW_ARG_CRE_DEB (View)
+### 1. Resumo
+View mais complexa do grupo: consolida, por nota de venda, a semana de packing, dados logísticos (navio, portos, incoterm), valor líquido de desconto financeiro, valor já baixado (pago) e um flag "possui_financeiro" indicando se a nota tem vínculo com o financeiro. Fonte de `VW_ARG_CRE_DEB` citada em `VW_NOTAS_31` (Objeto 3) como "Crédito/débito por projeto (moeda)".
+### 2. Fluxo de execução
+1. CTE `vlrbaixa_cte`: soma valores já baixados (pagos) por nota em `tgffin`, filtrando por tipos de operação de baixa específicos (1404/1408/1407/1400 a receber; 1502/1501/1308/1500 a pagar) e excluindo históricos de "substituição de portador".
+2. CTE `vlrdesc_cte`: soma desconto financeiro por nota.
+3. CTE `main_query`: junta TGFCAB com ~12 tabelas (produto, parceiro, projeto, tipo de operação, moeda, portos, navio, cidade/UF/país), calculando semana de packing (com tratamento especial para notas substituídas via `AD_NUNOTASUB`), mercado MI/ME, valor em moeda e taxa de câmbio. Filtra vendas liquidadas (`tipmov='V'`, `statusnota='L'`) que não tenham devolução total associada, com uma cadeia de `NOT EXISTS`/condições sobre `AD_CRE_DEB`, `VW_TGFPARC_TGFEMP` (exclui parceiros do grupo) e notas substituídas.
+4. SELECT final: junta `main_query` com `vlrbaixa_cte` e com `tgffin` (duas vezes, `f_nota`/`f_credito`) para determinar `possui_financeiro`, e agrega tudo por nota.
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+PACKINGWEEK, GRUPO, DESCROPER, CODPROJ, PROCESSO, NUNOTA, NUMNOTA, DTNEG, TIPOPROD, CLIENTE, AD_EX_CONTAINER, BOXES, VESSEL, SHIPPINGLINE, ETD, ETA, PORTO_ORIGEM, PORTO_DESTINO, INCONTERMS, AD_EX_TERMOG, MODTERMOGRAFO, AD_PALLET, MERCADO, VLRMOEDA, VLRNOTA (já líquido de desconto), VLRBAIXA, NOMEMOEDA, VLRMOEDAEX, AD_CRE_DEB, COTACAO, POSSUI_FINANCEIRO ('S'/'N'), NUNOTAORIG, AD_CONSCTRL.
+### 5. Regras de negócio
+- PACKINGWEEK: semana ISO calculada a partir de `dtfatur` (ou da nota original, se a nota for substituta via `AD_NUNOTASUB`) — mesmo padrão de cálculo de semana usado em `VW_NOTAS_31` (Objeto 3, Seção 6).
+- MERCADO: mesma regra de MI/ME de `VW_NOTAS_31` (país 55 + sem data prevista de embarque ⇒ MI).
+- `AD_CRE_DEB`: força 'D' quando `CODTIPOPER=2126`, senão usa o valor cadastrado no tipo de operação.
+- Exclui parceiros que são empresas do próprio grupo (`VW_TGFPARC_TGFEMP`, Objeto 26) e notas já substituídas.
+- `VLRBAIXA`: valor pago/baixado, limitado ao valor da nota (nunca maior que `VLRNOTA`) — trata baixa parcial/excedente.
+- `POSSUI_FINANCEIRO`: 'S' quando existe ao menos um lançamento em `tgffin` vinculado à nota (direto ou por crédito de projeto com tipo de operação 1317 e `ad_numop` contendo 'CREDIT'). Havia uma versão anterior comentada dessa mesma lógica como subquery correlacionada (`NVL((SELECT 'S' ...))`) — substituída por `COUNT(...) > 0` (provável otimização, mesma regra).
+### 6. Cálculos
+`VLRNOTA = mq.vlrnota - NVL(mq.VLRDESC, 0)`; `VLRBAIXA = LEAST(vb.vlrbaixa, mq.vlrnota)` (via CASE); `VLRMOEDAEX = ROUND(vlrnota / NULLIF(vlrmoeda,0), 2)`.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| View | VW_TGFPARC_TGFEMP | Exclusão de parceiros do grupo | ✔ Sim (Objeto 26) |
+| Tabela | TGFCAB / TGFITE / TGFPRO / TGFPAR / TCSPRJ / TGFTOP / TSIMOE / TGFVEI / TSICID / TSIUFS | Nota, item, produto, parceiro, projeto, tipo de operação, moeda, navio, localização | ✖ [EXTERNO] (Sankhya padrão) |
+| Tabela | AD_PORTO | Portos de embarque/descarga | ✖ [EXTERNO] |
+| Tabela | TGFFIN | Lançamentos financeiros (baixa, crédito) | ✖ [EXTERNO] (Sankhya padrão) |
+| Tabela | TGFVAR | Vínculo de nota substituta | ✖ [EXTERNO] (Sankhya padrão) |
+### 8. Objetos chamados
+VW_TGFPARC_TGFEMP (Objeto 26).
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — fonte de crédito/débito por projeto em moeda (OPEN_AMOUNT, CVLRNOTA, DVLRNOTA, CVLRMOEDAEX, DVLRMOEDAEX).
+### 10. Diagrama textual de dependências
+VW_ARG_CRE_DEB
+
+   ├─ VW_TGFPARC_TGFEMP (Objeto 26)
+
+   └─ TGFCAB / TGFITE / TGFPRO / TGFPAR / TCSPRJ / TGFTOP / TSIMOE / TGFVEI /
+
+      TSICID / TSIUFS / AD_PORTO / TGFFIN / TGFVAR   [EXTERNO] (Sankhya padrão)
+### 11. Pontos críticos
+- View muito densa (14+ joins, 3 CTEs, subquery lateral) — mesmo padrão de peso das views centrais do stack (VW_NOTAS_31, V9).
+- `[VALIDAR]` A lista de códigos de tipo de operação de baixa (1404/1408/1407/1400/1502/1501/1308/1500) e o filtro por texto `NOT LIKE '%substituição de portador%'` são valores/strings mágicos sem tabela de-para — mudança no cadastro Sankhya desses tipos de operação quebra o cálculo silenciosamente.
+### 12. Sugestões de melhoria
+[VALIDAR] Documentar (ou externalizar para tabela de configuração) os códigos de tipo de operação de baixa usados em `vlrbaixa_cte`.
+### 13. Resumo executivo (para analista funcional)
+Monta a "ficha financeira" de cada nota de venda: quanto já foi pago, se tem vínculo com o financeiro, dados de logística (navio, portos, prazo) e a semana de packing — é uma das fontes de crédito/débito que a planilha mestre de vendas usa.
+
+## OBJETO 23 — SANKHYA.VW_DESCFIN (View)
+### 1. Resumo
+Calcula o desconto financeiro proporcional por item de nota, ratando o desconto total lançado no financeiro entre os itens da nota pelo peso de cada um no valor total. Citada em `VW_NOTAS_31` (Objeto 3, Seção 5) como "Desconto financeiro proporcional".
+### 2. Fluxo de execução
+View com **dois braços unidos por `UNION ALL`, divididos por data de negociação** (`CAB.DTNEG`): braço "legado" para `DTNEG < DATE '2026-01-01'` (rateia o desconto sobre `VLRNOTA` da nota) e braço "novo" para `DTNEG >= DATE '2026-01-01'` (rateia sobre a soma viva de `VLRTOT` dos itens ainda válidos, via `AD_TGFITECOMPL`/`TGFITE` com `QTDNEG - AD_QTDDEV > 0`).
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+NUNOTA, NUMNOTA, CODPROD, SEQITE, VLRNOTA, VLRDESC, DESCPROP (desconto proporcional ao item), QUANTITY, TRACEABILITY.
+### 5. Regras de negócio
+- **Corte de data já em vigor** (`DATE '2026-01-01'`, e a data de hoje neste projeto é 07/07/2026) — diferente das datas de corte de `VW_NOTAS_31` (`PED_FRETE_VENDAS`/`PED_DESP_LOG`, ainda no futuro); aqui a mudança de regra **já está ativa** para todas as notas do ano corrente.
+- Braço legado: só considera lançamentos financeiros com `VLRDESC > 0.10` (ignora descontos residuais/arredondamento) e rateia sobre o `VLRNOTA` do cabeçalho.
+- Braço novo: rateia sobre a soma de `VLRTOT` dos itens **ainda válidos** (quantidade negociada menos devolução > 0), usando `AD_TGFITECOMPL` como base de item — ou seja, o rateio novo exclui itens totalmente devolvidos da base de rateio, o legado não distinguia isso.
+- `[VALIDAR]` A mudança de fonte de rateio (VLRNOTA fixo → soma viva de itens) é uma mudança funcional, não só de sintaxe — o valor de `DESCPROP` por item pode divergir entre uma nota antiga e uma nova mesmo com desconto total idêntico, se a nota tiver itens devolvidos.
+### 6. Cálculos
+Legado: `DESCPROP = ROUND(SUM(VLRDESC)/VLRNOTA × (QUANTITY×VLRUNIT), 2)`. Novo: `DESCPROP = ROUND(VLRDESC_TOT / SUM(VLRTOT) OVER (PARTITION BY NUNOTA) × (QUANTITY×VLRUNIT), 2)`.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| Tabela | VGFFIN | Lançamentos financeiros (desconto) | ✖ [EXTERNO] |
+| Tabela | AD_TGFITECOMPL / TGFITE / TGFCAB | Item/nota (braço novo) | ✖ [EXTERNO] |
+### 8. Objetos chamados
+Nenhum.
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — componente de `VLR_DESC_COM` (desconto do item + desconto financeiro proporcional).
+### 10. Diagrama textual de dependências
+VW_DESCFIN
+
+   ├─ VGFFIN                          [EXTERNO]
+
+   └─ AD_TGFITECOMPL / TGFITE / TGFCAB [EXTERNO]
+### 11. Pontos críticos
+`[VALIDAR]` Corte de regra por data (`2026-01-01`) já em vigor sem reconciliação registrada neste repositório entre o braço legado e o novo — se a mudança de fonte de rateio (VLRNOTA vs. soma viva) gerar diferença material em notas com devolução parcial, isso já está impactando o `VLR_DESC_COM`/margem de notas do ano corrente sem que haja registro de validação.
+### 12. Sugestões de melhoria
+[VALIDAR] Reconciliar DESCPROP por ANO/SEMANA/FRUTA para notas próximas ao corte de 2026-01-01, comparando braço legado vs. novo em notas com devolução parcial — para confirmar que a mudança de fonte de rateio não introduziu divergência de margem não sinalizada.
+### 13. Resumo executivo (para analista funcional)
+Divide o desconto financeiro (lançado uma vez para a nota inteira) entre os itens dessa nota, proporcionalmente ao valor de cada um — a partir de 2026, esse rateio passou a ignorar itens já devolvidos, o que pode mudar o valor por item comparado a notas mais antigas com desconto e devolução parcial ao mesmo tempo.
+
+## OBJETO 24 — SANKHYA.VW_PERCPROC_NF_V4 (View)
+### 1. Resumo
+Calcula o percentual que cada nota fiscal representa dentro de um "processo" (projeto guarda-chuva, código entre 4.000.000.000 e 4.999.999.999) — usado para ratear custos/despesas lançados no nível do processo entre as notas individuais que o compõem.
+### 2. Fluxo de execução
+CTE `BASE`: para cada item de venda liquidada vinculado a um processo (projeto na faixa 4bi-5bi), calcula o valor do item já líquido de devolução (via `VW_BMC_GET_QTD_DEV_VENDA`, Objeto 18) e sua fração do valor total da nota (usando calibre via `AD_MONTPALLETITE` quando disponível). CTE `AGREGADO`: soma o valor de todas as notas do mesmo processo/parceiro/tipo de operação. SELECT final: percentual = valor do item / total do processo.
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+PROCESSO, NUNOTA, VLRNOTA, NRO_NFS (quantidade de notas no processo), TOTAL_VLRNOTA (valor total do processo), PERCENTUAL.
+### 5. Regras de negócio
+- Só considera itens com quantidade líquida positiva (`QTDNEG - devolução > 0`, via LEFT JOIN com Objeto 18).
+- Processo é identificado por uma faixa numérica de código de projeto (4bi-5bi) — valor mágico sem tabela de-para explicando por que essa faixa específica identifica "processo" (provavelmente uma convenção de numeração de projeto do Sankhya para este cliente).
+- Prioriza o vínculo por pallet/calibre (`AD_MONTPALLETITE`) quando existir, senão usa a quantidade negociada direta do item.
+### 6. Cálculos
+`VLRNFROPP = VLRNOTA × ((qtd do item) × VLRUNIT) / SUM(VLRTOT da nota)`; `PERCENTUAL = SUM(VLRNFROPP) / TOTAL_VLRNOTA do processo`.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| View | VW_BMC_GET_QTD_DEV_VENDA | Líquido de devolução por item | ✔ Sim (Objeto 18) |
+| Tabela | TGFCAB / TGFITE / TGFTOP | Nota, item, tipo de operação | ✖ [EXTERNO] (Sankhya padrão) |
+| Tabela | AD_MONTPALLETITE | Vínculo de pallet/calibre | ✖ [EXTERNO] |
+### 8. Objetos chamados
+Nenhum (usa a view VW_BMC_GET_QTD_DEV_VENDA via JOIN, não chamada escalar).
+### 9. Objetos que provavelmente dependem deste objeto
+VW_NOTAS_31 (Objeto 3) — coluna PERCENTUAL, usada no rateio de crédito/débito por projeto.
+### 10. Diagrama textual de dependências
+VW_PERCPROC_NF_V4
+
+   ├─ VW_BMC_GET_QTD_DEV_VENDA (Objeto 18)
+
+   ├─ TGFCAB / TGFITE / TGFTOP     [EXTERNO] (Sankhya padrão)
+
+   └─ AD_MONTPALLETITE             [EXTERNO]
+### 11. Pontos críticos
+`[VALIDAR]` Faixa de código de projeto (4.000.000.000–4.999.999.999) hardcoded como identificador de "processo" — se a numeração de projetos mudar de convenção, esta view para de capturar processos silenciosamente.
+### 12. Sugestões de melhoria
+[VALIDAR] Documentar (ou mover para uma tabela de configuração) o significado da faixa 4bi-5bi de código de projeto.
+### 13. Resumo executivo (para analista funcional)
+Quando várias notas fiscais pertencem ao mesmo "processo" (embarque/projeto consolidado), esta view calcula que fatia (%) cada nota representa do total — usado para dividir custos ou despesas lançadas no processo inteiro entre as notas que o compõem.
+
+## OBJETO 25 — SANKHYA.VW_TGFCAB_ITE (View)
+### 1. Resumo
+View de enriquecimento "cabeçalho + item": uma junção ampla de nota (TGFCAB), item (TGFITE), produto, grupo de produto, parceiro, projeto (resolvido a nível de item ou de cabeçalho), natureza contábil e centro de custo (idem, item ou cabeçalho), localização geográfica do parceiro. É a base comum de `VW_ARG_DEB_CRE_ITE` (Objeto 21) e referenciada por `VW_NOTAS_31` (Objeto 3) como "Cabeçalho+item (pedidos frete/log)".
+### 2. Fluxo de execução
+SELECT direto (sem CTE) com ~13 INNER JOINs (tipo de operação, item, produto, grupo, parceiro, projeto por item, projeto por cabeçalho, natureza, centro de custo por cabeçalho, cidade/UF/país, centro de custo por item, centro de custo por cabeçalho de novo) + 1 LEFT JOIN (usuário de inclusão).
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+~50 colunas: CODEMP, CODPROJ/PROJETO (resolvido: usa o do item se preenchido, senão o do cabeçalho), dados temporais (DTENTSAI/DTNEG/DTFATUR/DTVAL/DTCONTAB), parceiro, moeda, CODCENCUS/DESCRCENCUS (idem resolução item/cabeçalho), natureza, valores (VLRNOTA/VLRFRETE/VLRMOEDA), tipo de movimento/operação, colunas de item (produto, controle, pallet, calibre, localização, quantidade, valores unit/total, peso, grupo de produto), MERCADO (MI/ME, mesma regra de VW_NOTAS_31), AD_CRE_DEB, AD_CONSCTRL, AD_QTDNEG/AD_QTDNEGOR.
+### 5. Regras de negócio
+- CODPROJ/PROJETO: prioriza o projeto do **item** (`AD_CODPROJ`); se for 0 (não preenchido), usa o projeto do **cabeçalho**. Mesmo padrão de resolução para CODCENCUS/DESCRCENCUS (centro de custo do item, com fallback pro do cabeçalho).
+- MERCADO: mesma regra de MI/ME das demais views do stack (país 55 sem data prevista de embarque ⇒ MI).
+- `--ITE.AD_CODPROJ` aparece comentado no SELECT — a coluna bruta não é exposta diretamente (só o CODPROJ já resolvido).
+### 6. Cálculos
+`VLRNOTA_MOE = ROUND(VLRNOTA / NULLIF(VLRMOEDA,0), 2)`; `VLRCOT = CASE WHEN VLRMOEDA=0 THEN 1 ELSE VLRMOEDA END`.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| Tabela | TGFCAB / TGFTOP / TGFITE / TGFPRO / TGFGRU / TGFPAR / TCSPRJ / TGFNAT / TSICUS / TSICID / TSIUFS / TSIPAI / TSIUSU | Nota, item, produto, grupo, parceiro, projeto, natureza, centro de custo, localização, usuário | ✖ [EXTERNO] (Sankhya padrão) |
+### 8. Objetos chamados
+Nenhum.
+### 9. Objetos que provavelmente dependem deste objeto
+VW_ARG_DEB_CRE_ITE (Objeto 21) — fonte única de dados. VW_NOTAS_31 (Objeto 3) — referenciada para pedidos de frete/log.
+### 10. Diagrama textual de dependências
+VW_TGFCAB_ITE
+
+   └─ TGFCAB / TGFTOP / TGFITE / TGFPRO / TGFGRU / TGFPAR / TCSPRJ (x2) /
+
+      TGFNAT / TSICUS (x3) / TSICID / TSIUFS / TSIPAI / TSIUSU   [EXTERNO] (Sankhya padrão)
+### 11. Pontos críticos
+Múltiplos INNER JOIN na mesma tabela `TSICUS` com aliases diferentes (CUS, CUSI, CUSC) para resolver centro de custo em 3 granularidades diferentes — legível mas fácil de confundir qual alias representa qual nível (cabeçalho vs. item vs. resolvido).
+### 12. Sugestões de melhoria
+Nenhuma sugestão específica — view é uma junção direta sem lógica de cálculo complexa.
+### 13. Resumo executivo (para analista funcional)
+É uma "visão combinada" de nota + item já com projeto e centro de custo resolvidos (prioriza o do item, cai pro do cabeçalho se não tiver) — serve de base para as views de rateio de crédito/débito.
+
+## OBJETO 26 — SANKHYA.VW_TGFPARC_TGFEMP (View)
+### 1. Resumo
+Lista os parceiros (TGFPAR) que são, na verdade, empresas do próprio grupo econômico (identificados por CGC/CPF em comum com o cadastro de empresas TSIEMP) — usada para excluir transações intercompany das views de crédito/débito e da planilha mestre de vendas.
+### 2. Fluxo de execução
+SELECT DISTINCT direto: junta TGFPAR com TSIEMP pelo CGC/CPF, excluindo um CGC específico e exigindo CGC/CPF preenchido (>0).
+### 3. Entradas
+Nenhum parâmetro — view direta.
+### 4. Saídas
+CODPARC, NOMEPARC, CGC_CPF.
+### 5. Regras de negócio
+- Um parceiro "é do grupo" quando seu CGC/CPF bate com o de alguma empresa cadastrada em TSIEMP.
+- `[VALIDAR]` `EMP.CGC<>27185579821` exclui explicitamente uma empresa específica do grupo desta lista — não está documentado qual empresa é essa nem por que ela é tratada como "não é parceiro do grupo para este fim" (pode ser a própria empresa matriz/emissora, que não faz sentido aparecer como "parceiro" dela mesma; ou pode ser uma filial que deveria ser tratada como parceiro externo por algum motivo de negócio).
+### 6. Cálculos
+Nenhum — filtro direto.
+### 7. Dependências
+| Tipo | Nome | Utilização | Está nos arquivos? |
+|---|---|---|---|
+| Tabela | TGFPAR / TSIEMP | Parceiro e cadastro de empresas do grupo | ✖ [EXTERNO] (Sankhya padrão) |
+### 8. Objetos chamados
+Nenhum.
+### 9. Objetos que provavelmente dependem deste objeto
+VW_ARG_CRE_DEB (Objeto 22) — exclusão de parceiros do grupo. VW_NOTAS_31 (Objeto 3) — mesma finalidade ("Parceiros que são empresas do grupo").
+### 10. Diagrama textual de dependências
+VW_TGFPARC_TGFEMP
+
+   └─ TGFPAR / TSIEMP   [EXTERNO] (Sankhya padrão)
+### 11. Pontos críticos
+`[VALIDAR]` CGC hardcoded (27185579821) sem comentário explicando qual empresa é ou por que está excluída — se essa empresa for renumerada/refeita no cadastro, a exclusão para de funcionar silenciosamente.
+### 12. Sugestões de melhoria
+[VALIDAR] Documentar (comentário na view) qual empresa é o CGC 27185579821 e por que é excluída da lista de "parceiros do grupo".
+### 13. Resumo executivo (para analista funcional)
+Identifica quais "clientes/fornecedores" cadastrados são, na real, outras empresas do mesmo grupo econômico — usado para não contar venda entre empresas do próprio grupo como se fosse venda externa de verdade.
+
 SEÇÃO FINAL — Lista de dependências para você trazer
 Objetos referenciados pelos arquivos já trazidos mas ainda não presentes no repositório. Priorizados por relevância para a lógica de negócio (os padrão Sankhya TGF*/TSI*/TCS* têm estrutura conhecida e ficam por último).
 
 ✅ Grupo 🔴 completo, trazido e documentado (07/07/2026): as 5 views de custo (VW_BMC_BI_CUSTOS_PROD_OTM, VW_BMC_BI_PERCA_PACK, VW_BMC_FRETE_MARITIMO, VW_BMC_DESPESAS_PORTUARIAS, VW_BMC_BI_PROV_FORNECEDORES — Objetos 13 a 17) e as 9 functions de cálculo (FU_BMC_GETPROVFORN, FU_BMC_GETROYALTIES, FU_BMC_GETCOMVENDA, FU_BMC_GETPERCCOMVENDA, FU_BMC_GETCUSTOPREVISTO, FU_BMC_PRECO_CUSTO_GER, FU_ARG_TXADM_CUSTO_GER, FUN_ARG_VLRETIQSRV, FUN_ARG_VLRETIQ — Objetos 4 a 12).
 
-🟠 Prioridade MÉDIA — views de quantidade/devolução e financeiro
-VW_BMC_GET_QTD_DEV_VENDA
-VW_BMC_GET_QTD_DEV_VENDA_FOR
-VW_BMC_GET_QTD_DEV_VENDA2
-VW_ARG_DEB_CRE_ITE
-VW_ARG_CRE_DEB
-VW_DESCFIN
-VW_PERCPROC_NF_V4
-VW_AD_REC_COMD
-VW_TGFCAB_ITE
-VW_TGFPARC_TGFEMP
+✅ Grupo 🟠 (views de quantidade/devolução/financeiro) quase completo, trazido e documentado (07/07/2026): VW_BMC_GET_QTD_DEV_VENDA (Objeto 18), VW_BMC_GET_QTD_DEV_VENDA_FOR (19), VW_BMC_GET_QTD_DEV_VENDA2 (20), VW_ARG_DEB_CRE_ITE (21), VW_ARG_CRE_DEB (22), VW_DESCFIN (23), VW_PERCPROC_NF_V4 (24), VW_TGFCAB_ITE (25), VW_TGFPARC_TGFEMP (26).
+
+🔴 Pendência de conteúdo (não é objeto novo, é erro ao trazer)
+VW_AD_REC_COMD — o DBExplorer (Sankhya Om) dá erro consistente ao abrir esta view especificamente ("Cannot read properties of undefined (reading 'colunas')"), reproduzido em 2 tentativas. Pode ser um bug pontual da ferramenta ou o objeto estar de fato inválido no Oracle — [VALIDAR] checar `SELECT status FROM all_objects WHERE object_name = 'VW_AD_REC_COMD'` direto no banco antes de insistir via DBExplorer.
+
+🟡 Descobertas nesta rodada — variações não previstas na lista original, ainda não trazidas (mencionar se quiser que eu busque numa próxima rodada)
+VW_BMC_GET_QTD_DEV_VENDA_ROM (variação de _FOR/_2, possivelmente "por romaneio" com lógica diferente de VENDA2), VW_ARG_CRE_DEB_BAIXA, VW_ARG_CRE_DEB_NOVA, VW_ARG_CRE_DEB1 (variações de VW_ARG_CRE_DEB), VW_DESCFIN_V2 (variação de VW_DESCFIN).
+
 VW_BMC_GETPRECOENTRADA / FU_BMC_GETPRECOENTRADA — [VALIDAR] confirmar se é um único objeto (nome com prefixo inconsistente num dos dois lugares) ou dois objetos distintos; ver Objeto 13, Pontos críticos
+
 🟠 Prioridade MÉDIA — materialized views (impactam refresh/ordem)
 VW_M_CUSTOMED_SEMANA (definição da MV + o SELECT base)
 VW_M_NFVENDAS_DEVINT
@@ -1148,7 +1495,7 @@ TGFCAB, TGFITE, TGFPRO, TGFGRU, TGFPAR, TSICID, TSIUFS, TSIPAI, TGFTOP, TGFNAT, 
 Descoberta nesta rodada (07/07/2026): obtemcusto4 — function utilitária padrão Sankhya, chamada por FUN_ARG_VLRETIQ e por VW_BMC_BI_CUSTOS_PROD_OTM (Objeto 2 dependency). Corpo ainda não trazido — comportamento é uma caixa-preta parcial (ver Objeto 11, Pontos críticos).
 
 Sugestão de como enviar
-Grupo 🔴 fechado. Para a próxima rodada, priorizar o grupo 🟠 (views de quantidade/devolução/financeiro) — são as que fecham o rastreamento de VLRCTE/PED_FR/crédito-débito já sinalizado como [EXTERNO] no Objeto 3 (VW_NOTAS_31).
+Grupos 🔴 e 🟠 praticamente fechados. Falta só VW_AD_REC_COMD (erro na ferramenta, ver acima) e, opcionalmente, as variações descobertas nesta rodada. Para a próxima rodada, priorizar o grupo 🟠 restante (materialized views VW_M_CUSTOMED_SEMANA/VW_M_NFVENDAS_DEVINT/VW_M_CONTROLE_VLRMP) ou o grupo 🟡.
 
 Se quiser, você pode gerar a lista real de dependências direto do dicionário com:
 

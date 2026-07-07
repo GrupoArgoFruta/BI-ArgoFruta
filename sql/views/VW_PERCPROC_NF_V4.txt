@@ -1,0 +1,132 @@
+    WITH BASE AS (
+    SELECT
+
+        NVL(ITE.AD_CODPROJ,
+        CAB.CODPROJ) AS PROCESSO,
+
+        CAB.NUNOTA,
+
+        CAB.VLRNOTA,
+
+        CAB.CODTIPOPER,
+
+        CAB.CODPARC,
+
+        (CAB.VLRNOTA * ((COALESCE(mp.qtd,
+        ite.qtdneg) * ite.vlrunit) / q.vlrtotnota)) AS VLRNFROPP
+
+    FROM
+        TGFCAB CAB
+
+    INNER JOIN
+        TGFITE ITE
+
+            ON ITE.NUNOTA = CAB.NUNOTA
+
+            AND CAB.TIPMOV = 'V'
+
+            AND CAB.STATUSNOTA = 'L'
+
+            AND NVL(ITE.AD_CODPROJ,
+        CAB.CODPROJ) BETWEEN 4000000000 AND 4999999999
+
+    INNER JOIN
+        TGFTOP TOP
+
+            ON TOP.CODTIPOPER = CAB.CODTIPOPER
+
+            AND CAB.DHTIPOPER = TOP.DHALTER
+
+            AND COALESCE(TOP.AD_CRE_DEB,
+        'X') = 'X'
+
+        AND UPPER(TOP.GRUPO) = 'VENDAS'
+
+    INNER JOIN
+        (
+        SELECT
+            NUNOTA,
+            SUM(QTDNEG) AS QTDNEGNOTA,
+            SUM(VLRTOT) AS VLRTOTNOTA
+
+        FROM
+            TGFITE
+
+        GROUP BY
+            NUNOTA
+    ) q
+            ON q.NUNOTA = CAB.NUNOTA
+
+    LEFT JOIN
+        AD_MONTPALLETITE mp
+
+            ON ITE.AD_PALLET = mp.NROUNICO
+
+            AND mp.CODPRODPA = ITE.CODPROD
+
+            AND mp.CALIBRE = SUBSTR(ITE.CONTROLE,
+        10,
+        2)
+
+    LEFT JOIN
+        VW_BMC_GET_QTD_DEV_VENDA DEV
+
+            ON DEV.NUNOTAORIG = CAB.NUNOTA
+
+            AND DEV.sequenciaorig = ITE.SEQUENCIA
+
+    WHERE
+        (ITE.QTDNEG - NVL(DEV.V_QTDDEV, 0)) > 0
+),
+AGREGADO AS (
+    SELECT
+
+        PROCESSO,
+
+        CODTIPOPER,
+
+        CODPARC,
+
+        COUNT(DISTINCT NUNOTA) AS NRO_NFS,
+
+        SUM(VLRNFROPP) AS TOTAL_VLRNOTA
+
+        FROM
+            BASE
+
+        GROUP BY
+            PROCESSO,
+            CODTIPOPER,
+            CODPARC
+)
+SELECT
+    B.PROCESSO,
+    B.NUNOTA,
+    B.VLRNOTA,
+    A.NRO_NFS,
+    A.TOTAL_VLRNOTA,
+    (
+            SUM(B.VLRNFROPP) / A.TOTAL_VLRNOTA
+        ) AS PERCENTUAL
+FROM BASE B
+INNER
+    JOIN
+        AGREGADO A
+
+            ON A.PROCESSO = B.PROCESSO
+
+            AND A.CODPARC = B.CODPARC
+
+            AND A.CODTIPOPER = B.CODTIPOPER
+GROUP
+    BY
+
+    B.PROCESSO,
+
+    B.NUNOTA,
+
+    B.VLRNOTA,
+
+    A.NRO_NFS,
+
+    A.TOTAL_VLRNOTA

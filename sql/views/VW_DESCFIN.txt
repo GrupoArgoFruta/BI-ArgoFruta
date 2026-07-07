@@ -1,0 +1,107 @@
+    WITH DESC_NOTA AS (
+    SELECT
+        NUNOTA,
+        SUM(VLRDESC) AS VLRDESC_TOT
+
+    FROM
+        VGFFIN
+
+    WHERE
+        RECDESP = 1
+
+        AND    VLRDESC > 0.10
+
+    GROUP  BY
+        NUNOTA
+),
+ITENS AS (
+    SELECT
+        ITE.NUNOTA,
+        ITE.PRODUCTCODE AS CODPROD,
+        ITE.SEQITE,
+
+           ITE.QUANTITY,
+        ITE.VLRUNIT,
+        ITE.TRACEABILITY,
+        ITE.VLRTOT
+
+    FROM
+        AD_TGFITECOMPL ITE
+
+    JOIN
+        TGFITE ITEO
+
+            ON   ITEO.NUNOTA    = ITE.NUNOTA
+
+            AND   ITEO.SEQUENCIA = ITE.SEQITE
+
+            AND   ITEO.QTDNEG - NVL(ITEO.AD_QTDDEV,
+        0) > 0
+)
+-- ===== Braço legado: DTNEG < 2026-01-01 (rateio sobre VLRNOTA) =====
+SELECT
+    MAX(FIN.NUNOTA)                                                   AS NUNOTA,
+    CAB.NUMNOTA                                                       AS NUMNOTA,
+    ITE.PRODUCTCODE                                                   AS CODPROD,
+    ITE.SEQITE                                                        AS SEQITE,
+    MAX(CAB.VLRNOTA)                                                  AS VLRNOTA,
+    SUM(FIN.VLRDESC)                                                  AS VLRDESC,
+    ROUND(SUM(FIN.VLRDESC)/MAX(CAB.VLRNOTA)*(ITE.QUANTITY*ITE.VLRUNIT), 2) AS DESCPROP,
+    ITE.QUANTITY                                                      AS QUANTITY,
+    ITE.TRACEABILITY                                                  AS TRACEABILITY
+FROM   VGFFIN FIN
+JOIN   AD_TGFITECOMPL ITE
+
+        ON   FIN.NUNOTA = ITE.NUNOTA
+
+        AND   FIN.VLRDESC > 0.10
+
+        AND   FIN.RECDESP = 1
+JOIN   TGFCAB CAB
+
+            ON   CAB.NUNOTA = ITE.NUNOTA
+
+            AND   CAB.DTNEG < DATE '2026-01-01'
+GROUP
+    BY
+        ITE.PRODUCTCODE,
+        ITE.SEQITE,
+        ITE.QUANTITY,
+        ITE.VLRUNIT,
+
+         ITE.TRACEABILITY,
+        CAB.NUMNOTA
+UNION ALL
+-- ===== Braço novo: DTNEG >= 2026-01-01 (rateio sobre SUM VLRTOT vivo) =====
+SELECT
+    I.NUNOTA                                                         AS NUNOTA,
+
+    CAB.NUMNOTA                                                      AS NUMNOTA,
+
+    I.CODPROD                                                        AS CODPROD,
+
+    I.SEQITE                                                         AS SEQITE,
+
+    CAB.VLRNOTA                                                      AS VLRNOTA,
+
+    D.VLRDESC_TOT                                                    AS VLRDESC,
+
+    ROUND(D.VLRDESC_TOT
+          / SUM(I.VLRTOT) OVER (PARTITION
+    BY
+        I.NUNOTA)
+          * (I.QUANTITY * I.VLRUNIT),
+        2)                            AS DESCPROP,
+
+    I.QUANTITY                                                       AS QUANTITY,
+
+    I.TRACEABILITY                                                  AS TRACEABILITY
+FROM   ITENS I
+JOIN   TGFCAB CAB
+
+            ON   CAB.NUNOTA = I.NUNOTA
+
+            AND   CAB.DTNEG >= DATE '2026-01-01'
+JOIN   DESC_NOTA D
+
+                ON   D.NUNOTA = I.NUNOTA

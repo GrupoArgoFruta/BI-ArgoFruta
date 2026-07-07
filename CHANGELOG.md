@@ -4,7 +4,27 @@ Log de progresso datado do trabalho neste repositório. Cada entrada distingue d
 
 Ordem: mais recente primeiro.
 
-## 07/07/2026 — Rastreamento de dependências (functions + views de custo)
+## 07/07/2026 (rodada 2) — Rastreamento de dependências (views de quantidade/devolução/financeiro)
+
+Continuação da rodada 1: trazer e documentar o grupo 🟠 (views de quantidade/devolução e financeiro) listado na Seção Final de `docs/STACK_MARGEM_BI.md`.
+
+### ✅ Confirmado (trazido e documentado) — 9 de 10 views do grupo 🟠
+
+`VW_BMC_GET_QTD_DEV_VENDA`, `VW_BMC_GET_QTD_DEV_VENDA_FOR`, `VW_BMC_GET_QTD_DEV_VENDA2`, `VW_ARG_DEB_CRE_ITE`, `VW_ARG_CRE_DEB`, `VW_DESCFIN`, `VW_PERCPROC_NF_V4`, `VW_TGFCAB_ITE`, `VW_TGFPARC_TGFEMP` — corpo real trazido do DBExplorer e documentado com seção completa de 13 partes (Objetos 18 a 26). Referências cruzadas em `VW_NOTAS_31` (Objeto 3) atualizadas de `[EXTERNO]` para `✔ Sim`.
+
+### ⚠️ Pendências abertas (não tratar como concluído)
+
+- `VW_AD_REC_COMD` — não trazida. O DBExplorer dá erro consistente ao abrir esta view especificamente ("Cannot read properties of undefined (reading 'colunas')"), reproduzido em 2 tentativas. `[VALIDAR]` confirmar no Oracle (`SELECT status FROM all_objects WHERE object_name = 'VW_AD_REC_COMD'`) se o objeto está inválido de fato, ou se é um bug pontual da ferramenta.
+- `[VALIDAR]` `VW_DESCFIN` (Objeto 23) tem um corte de regra por data (`DTNEG < '2026-01-01'` vs. `>= '2026-01-01'`) que muda a fonte de rateio do desconto financeiro (de `VLRNOTA` fixo para soma viva de itens não devolvidos) — **já em vigor** para todas as notas do ano corrente, sem reconciliação registrada entre os dois braços.
+- `[VALIDAR]` `VW_ARG_DEB_CRE_ITE` (Objeto 21) trata a condição de "débito válido" de forma assimétrica entre o branch por controle (CT) e o branch por calibre (CL) — não confirmado se é intencional.
+- `[VALIDAR]` `VW_TGFPARC_TGFEMP` (Objeto 26) exclui um CGC específico (27185579821) hardcoded sem explicação de qual empresa é.
+- Descobertas variações não previstas na lista original, ainda não trazidas: `VW_BMC_GET_QTD_DEV_VENDA_ROM`, `VW_ARG_CRE_DEB_BAIXA`, `VW_ARG_CRE_DEB_NOVA`, `VW_ARG_CRE_DEB1`, `VW_DESCFIN_V2`.
+
+### ➡️ Próximo passo recomendado
+
+Confirmar no Oracle o status de `VW_AD_REC_COMD`. Depois, seguir para o restante do grupo 🟠 (materialized views `VW_M_CUSTOMED_SEMANA`/`VW_M_NFVENDAS_DEVINT`/`VW_M_CONTROLE_VLRMP`) ou grupo 🟡, listados na Seção Final de `docs/STACK_MARGEM_BI.md`.
+
+## 07/07/2026 (rodada 1) — Rastreamento de dependências (functions + views de custo)
 
 Rodada de rastreamento de dependências (não é otimização de performance): trazer e documentar objetos `[EXTERNO]` que a V9 chama, listados na Seção Final de `docs/STACK_MARGEM_BI.md`.
 

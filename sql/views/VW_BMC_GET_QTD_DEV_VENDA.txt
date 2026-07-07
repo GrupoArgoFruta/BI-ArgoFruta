@@ -1,0 +1,144 @@
+    SELECT
+        SUM(i.qtdneg) V_QTDDEV
+         ,
+        SUM(i.vlrtot) V_VLRDEV
+         ,
+        v.nunotaorig
+         ,
+        v.sequenciaorig
+         ,
+        CASE
+            WHEN c.codtipoper NOT IN (1227,
+            1228) THEN 'N'
+            ELSE 'S'
+        END REFUGO
+         ,
+        listagg(v.NUNOTA,
+        ',') nunotadest,
+
+         'D' AS TIPO,
+
+         listagg(c.chavenfe,
+        ',') chavenfe
+
+    FROM
+        TGFVAR v
+
+    INNER JOIN
+        TGFCAB c
+
+            ON c.nunota = v.nunota
+
+            AND c.tipmov = 'D'
+
+            AND C.STATUSNOTA = 'L'
+
+    INNER JOIN
+        TGFITE i
+
+            ON i.nunota = c.nunota
+
+            AND i.sequencia = v.sequencia
+GROUP
+    BY
+        v.nunotaorig
+        ,
+        v.sequenciaorig
+        ,
+        CASE
+            WHEN c.codtipoper NOT IN (1227,
+            1228) THEN 'N'
+            ELSE 'S'
+        END,
+        v.NUNOTA,
+        c.chavenfe
+/*
+UNION ALL
+
+  SELECT
+            SUM(i.AD_QTDNEGOR ) V_QTDDEV
+         ,
+            SUM(i.vlrtot) V_VLRDEV
+         ,
+            v.nunotaorig
+         ,
+            v.sequenciaorig
+         ,
+            CASE
+                WHEN c.codtipoper NOT IN (1227,
+                1228) THEN 'N'
+                ELSE 'S'
+            END REFUGO
+         ,
+            v.NUNOTA nunotadest
+         ,
+            CASE
+                WHEN c.CODTIPOPER in (2126,
+                2127) THEN 'F'
+                ELSE 'D'
+            END AS TIPO
+
+        FROM
+            TGFVAR v
+
+        INNER JOIN
+            TGFCAB c
+
+                ON c.nunota = v.nunota
+
+                AND c.CODTIPOPER in (
+                    2126,
+                2127)
+
+                AND (c.chavenfe IS NOT NULL )
+
+                AND (c.ad_nunotacref IS NULL)
+
+                AND C.STATUSNOTA = 'L'
+
+            INNER JOIN
+                TGFITE i
+
+                    ON i.nunota = c.nunota
+
+                    AND i.sequencia = v.sequencia
+
+            WHERE
+                NOT EXISTS (
+                    SELECT
+                        nunota
+                    FROM
+                        tgfcab ex1
+                    WHERE
+                        ex1.AD_NUNOTAsub=c.nunota
+                )
+
+                AND C.NUNOTA NOT IN (
+                    773267,788729,769512,
+769441,
+769127,
+769676,
+782466,
+783232,
+788729,
+773270,
+773268,
+773269
+                )
+GROUP
+            BY
+                v.nunotaorig
+        ,
+                v.sequenciaorig
+        ,
+                CASE
+                    WHEN c.codtipoper NOT IN (1227,
+                    1228) THEN 'N'
+                    ELSE 'S'
+                END,
+                CASE
+                    WHEN c.CODTIPOPER in (2126,
+                    2127) THEN 'F'
+                    ELSE 'D'
+                END,
+                v.NUNOTA;*/

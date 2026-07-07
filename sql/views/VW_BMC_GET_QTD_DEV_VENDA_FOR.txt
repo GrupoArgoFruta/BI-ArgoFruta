@@ -1,0 +1,51 @@
+    SELECT
+        SUM(i.QUANTITY) V_QTDDEV
+         ,
+        SUM(i.vlrtot) V_VLRDEV
+         ,
+        v.nunotaorig
+         ,
+        v.sequenciaorig
+         ,
+        CASE
+            WHEN c.codtipoper NOT IN (1227,
+            1228) THEN 'N'
+            ELSE 'S'
+        END REFUGO
+         ,
+        LISTAGG(v.NUNOTA,
+        ',') nunotadest
+         ,
+        i.codparc
+
+    FROM
+        TGFVAR v
+
+    INNER JOIN
+        TGFCAB c
+
+            ON c.nunota = v.nunota
+
+            AND c.tipmov = 'D'
+
+            AND C.STATUSNOTA = 'L'
+
+    INNER JOIN
+        ad_TGFITECOMPL i
+
+            ON i.nunota = c.nunota
+
+            AND i.SEQITE = v.sequencia
+GROUP
+    BY
+        v.nunotaorig
+        ,
+        v.sequenciaorig
+        ,
+        i.codparc
+        ,
+        CASE
+            WHEN c.codtipoper NOT IN (1227,
+            1228) THEN 'N'
+            ELSE 'S'
+        END

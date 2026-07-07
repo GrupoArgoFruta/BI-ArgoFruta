@@ -1,0 +1,481 @@
+    WITH vlrbaixa_cte AS (
+    SELECT
+        f.nunota,
+        NVL(SUM(
+            NVL(f.vlrbaixa, 0) +
+            NVL(f.vlrdesc, 0) -
+            NVL(f.vlrjuro, 0) +
+            NVL(f.vlrvarcambial, 0) * -1
+        ),0) AS vlrbaixa
+    FROM
+        tgffin f
+    WHERE
+        f.dhbaixa IS NOT NULL
+
+    AND UPPER(NVL(f.historico, ' ')) NOT LIKE UPPER('%substituição de portador%')
+
+    AND (
+            (f.recdesp = 1
+    AND f.codtipoperbaixa IN (1404, 1408, 1407, 1400))
+            OR
+            (f.recdesp = -1
+    AND f.codtipoperbaixa IN (1502, 1501, 1308, 1500))
+        )
+
+GROUP BY
+        f.nunota
+),
+/*possui_financeiro_cte AS (
+    SELECT
+    DISTINCT
+        NVL(f.AD_NUNOTACRE,
+    f.nunota) nunota,
+
+        'S' AS possui_financeiro,
+
+        f.codproj,
+
+        f.codtipoper,
+
+        UPPER(f.ad_numop) ad_numop
+    FROM
+        tgffin f
+
+),*/
+vlrdesc_cte AS (
+    SELECT
+
+        f.NUNOTA,
+
+        NVL(SUM(NVL(f.VLRDESC,
+    0)),
+    0) AS VLRDESC
+    FROM
+        TGFFIN f
+
+    WHERE
+        f.RECDESP = 1
+
+    GROUP BY
+        f.NUNOTA
+),
+main_query AS (
+    SELECT
+        1 + TRUNC( (TRUNC(CASE
+        WHEN CAB.AD_NUNOTASUB IS NOT NULL
+                           THEN (SELECT
+            CAB2.DTFATUR
+        FROM
+            TGFCAB CAB2
+        WHERE
+            CAB2.NUNOTA=CAB.AD_NUNOTASUB )
+
+        ELSE cab.dtfatur
+    END) - TRUNC(TRUNC(cab.dtfatur,'YYYY'),'IW')) / 7 ) AS packingweek,
+        --TO_CHAR(cab.dtfatur, 'WW') AS packingweek,
+        top.grupo,
+        top.descroper,
+        prj.codproj codproj,
+        prj.identificacao  AS processo,
+        NVL(CAB.AD_NUNOTASUB,cab.nunota) NUNOTA,
+        cab.numnota,
+        CASE
+        WHEN CAB.AD_NUNOTASUB IS NOT NULL
+                           THEN (SELECT
+            CAB2.dtneg
+        FROM
+            TGFCAB CAB2
+        WHERE
+            CAB2.NUNOTA=CAB.AD_NUNOTASUB )
+
+        ELSE cab.dtneg
+    END dtneg,
+
+        LISTAGG(DISTINCT UPPER(pro.ad_cultivar), '; ') WITHIN
+GROUP (ORDER BY
+    cab.nunota) AS tipoprod,
+
+        par.codparc || ' - ' || par.nomeparc AS cliente,
+
+        cab.ad_ex_container,
+
+        SUM(ite.qtdneg) AS boxes,
+
+        nav.ad_navio AS vessel,
+
+        substr(cab.ad_liner,
+    1,
+    10) AS shippingline,
+
+        cab.ad_ex_dtprevemb AS etd,
+
+        cab.ad_ex_dtprevdes AS eta,
+
+        po1.nomporto AS porto_origem,
+
+        po2.nomporto AS porto_destino,
+
+        F_DESCROPC('TGFCAB',
+    'AD_INCOTERM',
+    cab.ad_incoterm) AS inconterms,
+
+        cab.ad_ex_termog,
+
+        F_DESCROPC('TGFCAB',
+    'AD_MODELO',
+    cab.ad_modelo) AS modtermografo,
+
+        cab.ad_pallet,
+
+        CASE
+
+    WHEN ufs.codpais = 55
+    AND cab.ad_ex_dtprevemb IS NULL THEN 'MI'
+
+    ELSE 'ME'
+
+END AS mercado,
+
+        CASE
+    WHEN NVL(cab.vlrmoeda,
+    0) = 0 THEN 1
+    ELSE cab.vlrmoeda
+END vlrmoeda,
+
+        cab.vlrnota,
+
+        moe.nomemoeda,
+
+        ROUND(cab.vlrnota / NVL(NULLIF(cab.vlrmoeda,
+0),
+1),
+2) AS vlrmoedaex,
+
+        CASE
+    WHEN CAB.CODTIPOPER=2126 THEN 'D'
+    ELSE top.ad_cre_deb
+END ad_cre_deb ,
+
+        NVL(NULLIF(cab.vlrmoeda,
+0),
+1) AS cotacao,
+
+        NVL(vd.VLRDESC,
+0) AS VLRDESC,
+
+        MAX(NUNOTAORIG) NUNOTAORIG,
+
+        nvl(cab.AD_CONSCTRL,
+'N') AD_CONSCTRL
+    FROM
+        tgfcab cab
+
+INNER JOIN
+        tgfite ite
+ON cab.nunota = ite.nunota
+    INNER JOIN
+        tgfpro pro
+    ON ite.codprod = pro.codprod
+    AND pro.usoprod IN ('T',
+    'R',
+    'V')
+    INNER JOIN
+        tgfpar par
+        ON par.codparc = cab.codparc
+    INNER JOIN
+        tcsprj prj
+            ON prj.codproj = cab.codproj
+    INNER JOIN
+        tgftop top
+                ON top.codtipoper = cab.codtipoper
+                AND top.dhalter = cab.dhtipoper--
+                AND TOP.ATUALFIN<>0
+    INNER JOIN
+        tsimoe moe
+                    ON moe.codmoeda = cab.codmoeda
+    LEFT JOIN
+        ad_porto po1
+                        ON po1.idporto = cab.ad_ex_portoembarque
+    LEFT JOIN
+        ad_porto po2
+                            ON po2.idporto = cab.ad_ex_portodescarga
+    LEFT JOIN
+        tgfvei nav
+                                ON nav.codveiculo = cab.ad_ex_navio
+    LEFT JOIN
+        tsicid cid
+                                    ON cid.codcid = par.codcid
+    LEFT JOIN
+        tsiufs ufs
+
+                        ON ufs.coduf = cid.uf
+    LEFT JOIN
+                                            vlrdesc_cte vd
+                                                ON vd.NUNOTA = cab.NUNOTA
+
+                                        LEFT JOIN
+                                            LATERAL (
+						   SELECT
+                                                MAX(VA1.NUNOTAORIG) AS NUNOTAORIG
+
+                                            FROM
+                                                TGFVAR VA1
+
+                                            WHERE
+                                                VA1.NUNOTA = CAB.NUNOTA
+						) VAR
+                                                ON 1=1
+   WHERE
+        cab.statusnota = 'L'
+
+                                                AND cab.tipmov = 'V'
+
+                                                AND NOT EXISTS (
+            SELECT
+                                                    1
+
+                                            FROM
+                                                tgfvar v
+
+                                            INNER JOIN
+                                                tgfcab c
+                                                    ON c.nunota = v.nunota
+                                                    AND c.tipmov = 'D'
+
+                                            INNER JOIN
+                                                tgfite i
+                                                    ON i.nunota = c.nunota
+                                                    AND i.sequencia = v.sequencia
+
+                                            WHERE
+                                                v.nunotaorig = cab.nunota
+        )
+
+                                            AND ((top.ad_cre_deb = 'D'
+                                            AND cab.statusnfe = 'A')
+                                            OR (top.ad_cre_deb = 'C')
+                                            OR (CAB.AD_NUNOTACREF IS NOT NULL
+                                            AND CAB.CODTIPOPER IN (2126)))
+
+                                            AND (top.ad_cre_deb IN ('C', 'D')
+                                            OR (CAB.AD_NUNOTACREF IS NOT NULL
+                                            AND CAB.CODTIPOPER IN (2126)))
+
+                                            AND NOT EXISTS (SELECT
+                                                CODPARC
+                                            FROM
+                                                VW_TGFPARC_TGFEMP EP
+
+                                            WHERE
+                                                EP.CODPARC= CAB.CODPARC)
+
+                                            AND NOT EXISTS (SELECT
+                                                CODPARC
+                                            FROM
+                                                TGFCAB SUB
+
+                                            WHERE
+                                                SUB.AD_NUNOTASUB= CAB.NUNOTA)
+       --
+                                            AND (CAB.CODTIPOPER NOT IN (2126)
+                                            OR CAB.AD_NUNOTACREF IS NOT NULL)
+
+                                        GROUP BY
+        cab.dtfatur,
+        top.grupo,
+        top.descroper,
+        prj.codproj,
+        prj.identificacao,
+        par.codparc,
+        par.nomeparc,
+        cab.ad_ex_container,
+        nav.ad_navio,
+        cab.ad_liner,
+        cab.ad_ex_dtprevemb,
+        cab.ad_ex_dtprevdes,
+        po1.nomporto,
+        po2.nomporto,
+        cab.ad_incoterm,
+        cab.ad_ex_termog,
+        cab.ad_modelo,
+        cab.ad_pallet,
+        ufs.codpais,
+        NVL(CAB.AD_NUNOTASUB,cab.nunota),
+        cab.numnota,
+        cab.dtneg,
+        cab.vlrnota,
+        cab.vlrmoeda,
+        vd.VLRDESC,
+        moe.nomemoeda,
+        cab.codmoeda,
+        top.ad_cre_deb,
+        cab.AD_CONSCTRL,
+        CAB.AD_NUNOTASUB,
+        CAB.AD_NUNOTACREF,
+        CAB.CODTIPOPER
+)
+SELECT
+    mq.packingweek,
+    mq.grupo,
+    mq.descroper,
+    TO_number(mq.codproj) codproj,
+    mq.processo,
+    mq.nunota,
+    mq.numnota,
+    mq.dtneg,
+    mq.tipoprod,
+    mq.cliente,
+    mq.ad_ex_container,
+    mq.boxes,
+    mq.vessel,
+    mq.shippingline,
+    mq.etd,
+    mq.eta,
+    mq.porto_origem,
+    mq.porto_destino,
+    mq.inconterms,
+    mq.ad_ex_termog,
+    mq.modtermografo,
+    mq.ad_pallet,
+    mq.mercado,
+    mq.vlrmoeda,
+    mq.vlrnota - NVL(mq.VLRDESC, 0) AS vlrnota,
+    NVL(CASE
+
+                                        WHEN vb.vlrbaixa > mq.vlrnota THEN mq.vlrnota
+
+                                        ELSE vb.vlrbaixa
+
+                                    END,0) AS vlrbaixa,
+    mq.nomemoeda,
+    mq.vlrmoedaex,
+    mq.ad_cre_deb,
+    mq.cotacao,
+   /*NVL((SELECT
+                                        'S'
+     FROM
+                                            TGFFIN f
+
+                                        WHERE
+                                            ((NVL(f.AD_NUNOTACRE, f.nunota) = mq.nunota) OR
+          (mq.codproj = f.codproj
+                                            AND f.codtipoper = 1317 AND
+          UPPER(f.ad_numop) like '%CREDIT%'))
+
+                                AND rownum = 1),
+   'N')  possui_financeiro*/
+    CASE
+                                            WHEN COUNT(f_nota.nunota) > 0
+                                            OR COUNT(f_credito.nunota) > 0 THEN 'S'
+                                            ELSE 'N'
+                                        END AS possui_financeiro,
+    mAX(MQ.NUNOTAORIG) NUNOTAORIG,
+    mq.AD_CONSCTRL
+FROM
+    main_query mq
+LEFT JOIN
+    vlrbaixa_cte vb
+
+                                            ON vb.nunota = mq.nunota
+LEFT
+                                    JOIN
+                                        tgffin f_nota
+                                            ON NVL(f_nota.AD_NUNOTACRE,
+                                        f_nota.nunota) = mq.nunota
+
+LEFT
+                                    JOIN
+                                        tgffin f_credito
+
+                                    ON mq.codproj = f_credito.codproj
+
+                                            AND f_credito.codtipoper = 1317
+
+                                            AND UPPER(f_credito.ad_numop) LIKE '%CREDIT%'
+WHERE NOT EXISTS (
+                                                SELECT
+                                                    nunota
+                                            FROM
+                                                AD_NOTASEXC ex
+                                            WHERE
+                                                ex.nunota=mq.nunota
+                                        )
+
+                                    GROUP BY
+                                        mq.packingweek,
+
+    mq.grupo,
+
+    mq.descroper,
+
+    mq.codproj,
+
+    mq.processo,
+
+    mq.nunota,
+
+    mq.numnota,
+
+    mq.dtneg,
+
+    mq.tipoprod,
+
+    mq.cliente,
+
+    mq.ad_ex_container,
+
+    mq.boxes,
+
+    mq.vessel,
+
+    mq.shippingline,
+
+    mq.etd,
+
+    mq.eta,
+
+    mq.porto_origem,
+
+    mq.porto_destino,
+
+    mq.inconterms,
+
+    mq.ad_ex_termog,
+
+    mq.modtermografo,
+
+    mq.ad_pallet,
+
+    mq.mercado,
+
+    mq.vlrmoeda,
+
+    mq.vlrnota,
+
+    mq.VLRDESC,
+
+    CASE
+
+                                        WHEN vb.vlrbaixa > mq.vlrnota THEN mq.vlrnota
+
+                                        ELSE vb.vlrbaixa
+
+                                    END,
+
+    mq.nomemoeda,
+
+    mq.vlrmoedaex,
+
+    mq.ad_cre_deb,
+
+    mq.cotacao ,
+
+    mq.AD_CONSCTRL
+
+/*
+                                LEFT JOIN
+    possui_financeiro_cte pf
+                                    ON (pf.nunota = mq.nunota
+                                    OR (mq.codproj = pf.codproj
+                                    AND pf.codtipoper = 1317 AND
+                          UPPER(pf.ad_numop) like '%CREDIT%'))*/

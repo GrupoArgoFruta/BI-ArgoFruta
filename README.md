@@ -42,6 +42,4 @@ skills/
 
 Toda proposta de mudança num objeto que alimenta o BI de margem mira **resultado idêntico** para qualquer conjunto de dados, a menos que seja uma correção funcional explícita. Onde a equivalência não é garantível só pelo texto, a mudança é marcada `[VALIDAR]` com o risco descrito — nunca recomendada às cegas. Antes de qualquer mudança ir para produção, ela é reconciliada contra produção. Detalhes completos em `CONTRIBUTING.md`.
 
-## Skills
 
-As pastas em `skills/` guardam checklists/fluxos de trabalho deste projeto. Elas ficam na raiz (não em `.claude/`) para ficarem visíveis e versionadas para todo o time — o efeito colateral é que não são descobertas automaticamente por ferramentas de IA como skill executável; são lidas como documento de referência quando a tarefa pedir.
