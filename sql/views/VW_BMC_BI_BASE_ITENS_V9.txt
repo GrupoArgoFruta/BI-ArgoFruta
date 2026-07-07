@@ -1,0 +1,3131 @@
+    SELECT
+        codregra,
+        
+       regra,
+        
+       semana,
+        
+       FRUTA,
+        
+       codfruta,
+        
+       codemp,
+        
+       ano,
+        
+       teste_credit,
+        
+       teste_debit,
+        
+       sequencia,
+        
+       operacao,
+        
+       processo,
+        
+       qtdpallet,
+        
+       loteargo,
+        
+       codprodutor,
+        
+       nomeprodutor,
+        
+       nropallet,
+        
+       nome_cliente,
+        
+       tipo_cx,
+        
+       data,
+        
+       mes,
+        
+       codvariedade,
+        
+       variedade,
+        
+       codvariedademp,
+        
+       variedademp,
+        
+       CODPRODCX,
+        
+       DESCRPRODCX,
+        
+       ROMANEIO,
+        
+       NFENTRADAMP,
+        
+       DTENTRADAMP,
+        
+       CENTRO_RESULTADO,
+        
+       CODCENTRO,
+        
+       nunotamp,
+        
+       nunota,
+        
+       nf,
+        
+       chavenfe,
+        
+       moeda,
+        
+       vlr_cotacao,
+        
+       inconterms,
+        
+       codprod,
+        
+       descrprod,
+        
+       RECEITA_BRUTA_MOE,
+        
+       RECEITA_BRUTA_MOE / nullif(vlr_cotacao,
+        0) as preco_venda_moeda,
+        
+       custo_mp / nullif(total_cx,
+        0) as custo_mp_caixa,
+        
+       vlr_kg,
+        
+       Peso_Total_Liq,
+        
+       qtdnegite,
+        
+       vlr_claim,
+        
+       codparc,
+        
+       PERCDESCCONTRATUAL,
+        
+       vlrnota,
+        
+       controle,
+        
+       CODLOCALORIG,
+        
+       codtipoper,
+        
+       vlrfrete,
+        
+       tipmov,
+        
+       codproj,
+        
+       codparcpatente,
+        
+       codparcpatentemp,
+        
+       NATUREZA,
+        
+       vlr_preco_venda,
+        
+       total_cx,
+        
+       vlr_receita_bruta_total+receita_frete vlr_receita_bruta_total,
+        
+       desconto_comercial,
+        
+       desconto_contratual,
+        
+       devolucao_realocacao,
+        
+       devolucao_perda,
+        
+       receita_complementar,
+        
+       nunota_complementar,
+        
+       receita_frete  AS RECEITA_FRETE,
+        
+       vlr_outras_dev,
+        
+       vlr_receita_liq1 /* +  vlr_receita_liq1 */,
+        
+       vlr_receita_liq1c,
+        
+       colheita,
+        
+       vlr_com_venda_com,
+        
+       vlr_com_venda_comc,
+        
+       vlr_com_venda_terc,
+        
+       vlr_com_venda_tercc,
+        
+       (FU_BMC_GETPROVFORN(data,
+        
+                          CODFRUTA,
+        
+                          CODPRODUTOR,
+        
+                          codvariedademp,
+        
+                          CODPARC,
+        
+                          MERCADO,
+        
+                          CODPROJ,
+        
+                          vlr_receita_liq1  ,
+        
+                          CUSTOTOTALGER,
+        
+                          vlr_com_venda_com,
+        CODPAIS,
+        ROMANEIO) /*-(CUSTOUNITARIOGER*TOTAL_CX) */) vlr_prov_forn ,
+        
+       vlr_royalties,
+        
+       vlr_royaltiesc,
+        
+       CUSTO_IMP_SALDO,
+        
+       custo_mp,
+        
+       CUSTOMEDIO,
+        
+       custo_embalagem,
+        
+       frete_rural,
+        
+       custos_diretos_mi,
+        
+       frete_rodoviario,
+        
+       frete_maritimo,
+        
+       frete_aereo,
+        
+       frete_aereoc,
+        
+       seguro_cred,
+        
+       DESP_PORTUARIAS,
+        
+       perda_pack,
+        
+       custos_diretos_me,
+        
+       custos_servicos,
+        
+       custo_operacao,
+        
+       provisao_fornecedores,
+        
+       custo_calculado,
+        
+       custo_calculadoC,
+        
+       (CASE
+         
+        WHEN FRUTA IN ('AVOCADO',
+        'UVA',
+        'LIMÃO') /*(FRUTA = 'AVOCADO' 
+        or CENTRO_RESULTADO LIKE '%UVA%')*/ THEN
+          (vlr_receita_liq1  )-
+           CUSTO_CALCULADO -
+          FU_BMC_GETPROVFORN(data,
+        
+                             CODFRUTA,
+        
+                             CODPRODUTOR,
+        
+                             codvariedademp,
+        
+                             CODPARC,
+        
+                             MERCADO,
+        
+                             CODPROJ,
+        
+                             vlr_receita_liq1,
+        
+                             custo_calculado,
+        
+                             vlr_com_venda_com,
+        CODPAIS,
+        
+                             ROMANEIO)
+         else
+          ((vlr_receita_liq1  ) - custo_calculado)
+       
+    end) as vlr_margem,
+    
+       custofreteger,
+    
+       custoetiqger,
+    
+       descger,
+    
+       COALESCE(((((vlr_receita_liq1  ) - CUSTO_CALCULADO -
+           FU_BMC_GETPROVFORN(data,
+    
+                                 CODFRUTA,
+    
+                                 CODPRODUTOR,
+    
+                                 codvariedademp,
+    
+                                 CODPARC,
+    
+                                 MERCADO,
+    
+                                 CODPROJ,
+    
+                                 vlr_receita_liq1,
+    
+                                 custo_calculado,
+    
+                                 vlr_com_venda_com,
+    CODPAIS,
+    
+                                 ROMANEIO)) /
+           NULLIF(vlr_receita_liq1,
+    0)) * 100),
+    
+           0) as perc_margem,
+    
+       (CASE
+         
+    WHEN FRUTA = 'AVOCADO' THEN
+          (vlr_receita_liq1 -
+          (custo_calculado + custofreteger + custoetiqger + descger +
+          (CUSTOUNITARIOGER * TOTAL_CX))) -
+          ((NULLIF(vlr_receita_liq1 * PERCMARGEMGER,
+    0)) / 100)
+
+         
+    when centro_resultado LIKE '%UVA%' 
+    and prv = 'S' THEN
+          (vlr_receita_liq1 - (CUSTO_MP + CUSTO_EMBALAGEM + custofreteger +
+          COALESCE(DESP_PORTUARIAS,
+    0) + custoetiqger +
+          descger + (CUSTOUNITARIOGER * total_cx))) -
+          ((NULLIF(vlr_receita_liq1 * PERCMARGEMGER,
+    0)) / 100)
+         ELSE
+          0
+       
+END) PROVISAO_FORNECEDOR_GER,
+
+       CUSTOUNITARIOGER,
+
+       TXADM_CUSTO_GER,
+
+       /*(CASE
+         
+WHEN FRUTA = 'MANGA' THEN
+          CUSTOETIQGER + CUSTOFRETEGER + frete_rodoviario + frete_maritimo + frete_aereo +  
+          (CUSTOUNITARIOGER * TOTAL_CX) +
+          DESCGER + CUSTO_MP + DESP_PORTUARIAS +
+          SEGURO_CRED + PROVISAO_FORNECEDOR_GER
+         ELSE
+          CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER + frete_rodoviario + frete_maritimo + frete_aereo +  (CUSTOUNITARIOGER * TOTAL_CX) +
+          DESCGER +
+          (vlr_receita_liq1 - (custo_calculado + custofreteger + frete_rodoviario + frete_maritimo + frete_aereo + 
+          custoetiqger + descger + (CUSTOUNITARIOGER * TOTAL_CX))) -
+          ((vlr_receita_liq1 * PERCMARGEMGER) / 100)
+       
+END) AS CUSTOTOTALGER,
+*/
+		(CASE
+		         
+		WHEN FRUTA = 'MANGA' THEN
+		          CUSTOETIQGER + CUSTOFRETEGER + (CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (frete_rodoviario + frete_maritimo +
+		          frete_aereo) 
+ELSE 0 
+END) + (CUSTOUNITARIOGER * TOTAL_CX) + DESCGER + CUSTO_MP +
+		          DESP_PORTUARIAS + SEGURO_CRED + PROVISAO_FORNECEDOR_GER+PERDA_PACK
+		         
+		WHEN FRUTA IN ('UVA') THEN
+		          CUSTO_MP + CUSTOETIQGER + CUSTOFRETEGER + (CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (frete_rodoviario + frete_maritimo +
+		          frete_aereo) 
+ELSE 0 
+END) + DESP_PORTUARIAS + SEGURO_CRED + (CUSTOUNITARIOGER * TOTAL_CX) +
+		          DESCGER + VLR_ROYALTIES + VLR_COM_VENDA_TERC
+		         ELSE
+		          CUSTO_CALCULADO + nvl(CUSTOETIQGER,
+0) + nvl(CUSTOFRETEGER,
+0) /*+ frete_rodoviario +
+		          frete_maritimo + frete_aereo*/ + (nvl(CUSTOUNITARIOGER,
+0) * TOTAL_CX) +
+		          DESCGER
+		END)+nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx),
+0)
+		/*+nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx),
+0) + nvl(FUN_ARG_VLRETIQ(to_number(nropallet))*total_cx,
+0)*/  AS CUSTOTOTALGER,
+
+		
+        		(CASE
+		         
+		WHEN FRUTA = 'MANGA' THEN
+		          CUSTOETIQGER + CUSTOFRETEGER + (CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (frete_rodoviario + frete_maritimo +
+		          frete_aereo) 
+ELSE 0 
+END) + (CUSTOUNITARIOGER * TOTAL_CX) + DESCGER + CUSTOMEDIO +
+		          DESP_PORTUARIAS + SEGURO_CRED + PROVISAO_FORNECEDOR_GER+PERDA_PACK
+		         
+		WHEN FRUTA IN ('UVA') THEN
+		          CUSTOMEDIO + CUSTOETIQGER + CUSTOFRETEGER + (CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (frete_rodoviario + frete_maritimo +
+		          frete_aereo) 
+ELSE 0 
+END) + DESP_PORTUARIAS + SEGURO_CRED + (CUSTOUNITARIOGER * TOTAL_CX) +
+		          DESCGER + VLR_ROYALTIES + VLR_COM_VENDA_TERC
+		         ELSE
+		          CUSTO_CALCULADO + nvl(CUSTOETIQGER,
+0) + nvl(CUSTOFRETEGER,
+0) /*+ frete_rodoviario +
+		          frete_maritimo + frete_aereo*/ + (nvl(CUSTOUNITARIOGER,
+0) * TOTAL_CX) +
+		          DESCGER
+		END)+nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx),
+0) AS CUSTOTOTALGERC,
+
+       /* (CASE
+         
+WHEN FRUTA = 'MANGA' THEN
+          vlr_receita_liq1 - ((CASE
+            
+WHEN FRUTA = 'MANGA' THEN
+             CUSTOETIQGER + CUSTOFRETEGER + frete_rodoviario + frete_maritimo + frete_aereo +  (CUSTOUNITARIOGER * TOTAL_CX) +
+             DESCGER + CUSTO_MP + DESP_PORTUARIAS +
+             SEGURO_CRED + PROVISAO_FORNECEDOR_GER
+            ELSE
+             CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER + frete_rodoviario + frete_maritimo + frete_aereo +  (CUSTOUNITARIOGER * TOTAL_CX) +
+             DESCGER +
+             (vlr_receita_liq1 - (custo_calculado + custofreteger + frete_rodoviario + frete_maritimo + frete_aereo + 
+             custoetiqger + descger + (CUSTOUNITARIOGER * TOTAL_CX))) -
+             ((vlr_receita_liq1 * PERCMARGEMGER) / 100)
+          
+END))
+         ELSE
+          (vlr_receita_liq1 * (PERCMARGEMGER)) / 100
+       
+END) AS MARGEMGER,
+*/
+		(CASE  
+WHEN FRUTA = 'MANGA' THEN
+		                        (vlr_receita_liq1) - ((CASE                    
+		
+		        
+		WHEN FRUTA = 'MANGA' THEN
+		                         CUSTOETIQGER + CUSTOFRETEGER +(CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN frete_rodoviario + frete_maritimo + frete_aereo 
+ELSE 0 
+END)+ (CUSTOUNITARIOGER * TOTAL_CX) +
+		                         DESCGER + CUSTO_MP + DESP_PORTUARIAS + nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx ),
+0)  +
+		                         SEGURO_CRED + PROVISAO_FORNECEDOR_GER+PERDA_PACK
+		                       ELSE
+		                         CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER + frete_rodoviario + frete_maritimo + frete_aereo +  (CUSTOUNITARIOGER * TOTAL_CX) +
+		                         DESCGER +nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx ),
+0)  +
+		                         ((vlr_receita_liq1) - (custo_calculado + custofreteger + frete_rodoviario + frete_maritimo + frete_aereo + 
+		                         custoetiqger + descger + (CUSTOUNITARIOGER * TOTAL_CX))) -
+		                         (((vlr_receita_liq1) * PERCMARGEMGER) / 100)                 
+		
+		        
+		END))
+		
+		        
+		WHEN FRUTA NOT IN ('AVOCADO',
+'UVA',
+'LIMÃO') THEN
+		                (vlr_receita_liq1  )- (CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER /*+ frete_rodoviario + frete_maritimo + frete_aereo*/ + nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx ),
+0)  + (CUSTOUNITARIOGER*TOTAL_CX) + DESCGER)
+		
+		                
+ELSE ((vlr_receita_liq1) * (PERCMARGEMGER)) / 100               
+		
+		        
+		END) AS MARGEMGER,
+
+
+      /* (CASE
+         
+WHEN FRUTA = 'MANGA' THEN
+          ((CASE
+            
+WHEN FRUTA = 'MANGA' THEN
+             vlr_receita_liq1 - ((CASE
+               
+WHEN FRUTA = 'MANGA' THEN
+                CUSTOETIQGER + CUSTOFRETEGER + (CUSTOUNITARIOGER * TOTAL_CX) +
+                DESCGER + CUSTO_MP + DESP_PORTUARIAS + SEGURO_CRED +
+                PROVISAO_FORNECEDOR_GER
+               ELSE
+                CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER +
+                (CUSTOUNITARIOGER * TOTAL_CX) + DESCGER +
+                (vlr_receita_liq1 -
+                (custo_calculado + custofreteger + custoetiqger + descger +
+                (CUSTOUNITARIOGER * TOTAL_CX))) -
+                ((vlr_receita_liq1 * PERCMARGEMGER) / 100)
+             
+END))
+            ELSE
+             (vlr_receita_liq1 * (PERCMARGEMGER)) / 100
+          
+END) / NULLIF(vlr_receita_liq1,
+0)) * 100
+         ELSE
+          COALESCE((((vlr_receita_liq1 * PERCMARGEMGER) / 100) /
+              NULLIF(vlr_receita_liq1,
+0) * 100),
+
+              0)
+       
+END) AS PERCMARGEMGER,
+*/
+		CASE 
+WHEN PROCESSO<>'REFUGO MP' 
+				THEN (CASE
+		
+		        
+		WHEN FRUTA = 'MANGA' THEN
+		                  ((CASE
+		
+		        
+		WHEN FRUTA = 'MANGA' THEN
+		                     (vlr_receita_liq1) - ((CASE
+		
+		        
+		WHEN FRUTA = 'MANGA' THEN
+		                        CUSTOETIQGER + CUSTOFRETEGER + (CUSTOUNITARIOGER * TOTAL_CX) + (CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN frete_rodoviario + frete_maritimo + frete_aereo 
+ELSE 0 
+END) + 
+		                        DESCGER + CUSTO_MP + DESP_PORTUARIAS + SEGURO_CRED +nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx ),
+0)  +
+		                        PROVISAO_FORNECEDOR_GER+PERDA_PACK
+		                       ELSE
+		                        CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER +
+		                        (CUSTOUNITARIOGER * TOTAL_CX) + DESCGER +
+		                        ((vlr_receita_liq1) -
+		                        (custo_calculado + custofreteger + custoetiqger + descger +nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx ),
+0)  +
+		                        (CUSTOUNITARIOGER * TOTAL_CX))) -
+		                        (((vlr_receita_liq1) * PERCMARGEMGER) / 100)
+		
+		        
+		END))
+		                    ELSE
+		                     ((vlr_receita_liq1) * (PERCMARGEMGER)) / 100
+		
+		        
+		END) / NULLIF(vlr_receita_liq1,
+
+		
+		        0)) * 100
+		
+		        
+		WHEN FRUTA NOT IN ('AVOCADO',
+
+		'UVA',
+
+		'LIMÃO') THEN
+		                (((vlr_receita_liq1) - 
+		                        (CUSTO_CALCULADO + CUSTOETIQGER + CUSTOFRETEGER +(CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN frete_rodoviario + frete_maritimo + frete_aereo 
+ELSE 0 
+END) + nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx ),
+0)  + (CUSTOUNITARIOGER*TOTAL_CX) + DESCGER))
+		                / NULLIF(vlr_receita_liq1,
+
+		0)) *100
+		
+		                ELSE
+		                  COALESCE(((((vlr_receita_liq1) * PERCMARGEMGER) / 100) /
+		                      NULLIF(vlr_receita_liq1,
+
+		
+		        0) * 100),
+
+		
+		
+		                      0)
+		
+		        
+		END) 
+ELSE 0 
+END AS PERCMARGEMGER,
+
+       NVL(STCOM,
+' ') status_comercial,
+
+       etd,
+
+       eta,
+
+       AD_EX_CONTAINER,
+
+       PORTO_ORIGEM,
+
+       PORTO_DESTINO,
+
+       OBSERVACAO,
+
+       VESSEL,
+
+       nvl((FUN_ARG_VLRETIQSRV(to_number(nropallet))*total_cx),
+0) + nvl(FUN_ARG_VLRETIQ(to_number(nropallet))*total_cx,
+0) custo_etiquetagem,
+
+       pais,
+
+--       CODPAIS,
+
+       prv,
+
+       ROYALT,
+
+       MERCADO,
+
+       OBS1,
+
+	   OBS2,
+
+	   LOSS,
+
+	   STCOM,
+
+	   CLIREALOC,
+
+	   ETDR,
+
+	   ETAR,
+
+	   CREDIT_MOE,
+
+	   DEBIT_MOE,
+
+	   NVL(OPEN_AMOUNT,
+0),
+
+	   BOOKING,
+
+	   LINER,
+
+	   DTENTROM,
+
+	   LOC_ENT
+  
+FROM
+(select
+codregra,
+
+               regra,
+
+               semana,
+
+               fruta,
+
+               codfruta,
+
+               codemp,
+
+               ano,
+
+               teste_credit,
+
+               teste_debit,
+
+               sequencia,
+
+               operacao,
+
+               processo,
+
+               qtdpallet,
+
+               loteargo,
+
+               codprodutor,
+
+               nomeprodutor,
+
+               nropallet,
+
+               nome_cliente,
+
+               tipo_cx,
+
+               data,
+
+               mes,
+
+               codvariedade,
+
+               variedade,
+
+               codvariedademp,
+
+               variedademp,
+
+               CODPRODCX,
+
+               DESCRPRODCX,
+
+               ROMANEIO,
+
+               NFENTRADAMP,
+
+               DTENTRADAMP,
+
+               CENTRO_RESULTADO,
+
+               CODCENTRO,
+
+               nunota,
+
+               nf,
+
+               chavenfe,
+
+               moeda,
+
+               COALESCE(vlr_cotacao,
+0) vlr_cotacao,
+
+               inconterms,
+
+               codprod,
+
+               descrprod,
+
+               qtdnegite,
+
+               (CASE
+                 
+WHEN vlr_cotacao > 0 THEN
+                   round((vlr_receita_bruta_total / NULLIF(vlr_cotacao,
+0)) + (receita_frete / NULLIF(vlr_cotacao,
+0)),
+2)
+                 ELSE
+                  vlr_receita_bruta_total+receita_frete 
+               
+END) AS RECEITA_BRUTA_MOE,
+
+               vlr_kg,
+
+               peso_tot_liq as Peso_Total_Liq,
+
+               vlr_claim,
+
+               codparc,
+
+               PERCDESCCONTRATUAL,
+
+               nunotamp,
+
+               vlrnota,
+
+               CODLOCALORIG,
+
+               controle,
+
+               codtipoper,
+
+               codparcpatente,
+
+               codparcpatentemp,
+
+               vlrfrete,
+
+               tipmov,
+
+               codproj,
+
+               NATUREZA,
+
+               vlr_preco_venda vlr_preco_venda,
+
+               --(qtdneg - qtddevvenda) total_cx,
+/*com devolução*/
+               qtdneg total_cx,
+
+               vlr_receita_bruta_total,
+
+               vlr_desc_com desconto_comercial,
+
+               desconto_contratual,
+
+               devolucao_realocacao,
+
+               devolucao_perda,
+
+               receita_complementar,
+
+               nunota_complementar,
+
+               receita_frete,
+
+               outras_devolucoes vlr_outras_dev,
+
+               ROUND(((vlr_receita_bruta_total + receita_complementar + (CASE
+                       
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                          0 --03/11/2025
+                        --receita_frete
+                       ELSE
+                        receita_frete
+                     
+END) + teste_debit) -
+                     (vlr_desc_com + /*desconto_contratual +*/
+                     devolucao_realocacao + devolucao_perda +
+                     outras_devolucoes + teste_credit)),
+
+                     2) vlr_receita_liq1,
+
+               0 vlr_receita_liq1c,
+
+               FU_BMC_GETROYALTIES(data,
+
+                                   CODPRODUTOR,
+
+                                   codvariedademp,
+
+                                   codparcpatentemp,
+
+                                   ROUND(((vlr_receita_bruta_total +
+                                         receita_complementar + /*(CASE
+                                           
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                                            0
+                                           ELSE
+                                            receita_frete
+                                         
+END) +*/ teste_debit) -
+                                         (vlr_desc_com + /*desconto_contratual +*/
+                                         devolucao_realocacao +
+                                         devolucao_perda +
+                                         outras_devolucoes + teste_credit)),
+
+                                         2),
+
+                                         MERCADO) vlr_royalties,
+
+               0 vlr_royaltiesc,
+
+               FU_BMC_GETCOMVENDA('COMERCIAL',
+
+                                  data,
+
+                                  CODFRUTA,
+
+                                  CODPRODUTOR,
+
+                                  codvariedademp,
+
+                                  CODPARC,
+
+                                  MERCADO,
+
+                                  CODPROJ,
+
+                                  codparcpatente,
+
+                                  ROUND(((vlr_receita_bruta_total +
+                                        receita_complementar + (CASE
+                                          
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                                           0
+                                          ELSE
+                                           receita_frete
+                                        
+END) + teste_debit) -
+                                        (vlr_desc_com + /*desconto_contratual +*/
+                                        devolucao_realocacao +
+                                        devolucao_perda + outras_devolucoes +
+                                        teste_credit)),
+
+                                        2),
+
+                                  vlr_receita_bruta_total,
+
+                                  CODPAIS,
+
+                                  ROMANEIO) vlr_com_venda_com,
+
+               0 vlr_com_venda_comc,
+
+               FU_BMC_GETCOMVENDA('TERCEIROS',
+
+                                  data,
+
+                                  CODFRUTA,
+
+                                  CODPRODUTOR,
+
+                                  codvariedademp,
+
+                                  CODPARC,
+
+                                  MERCADO,
+
+                                  CODPROJ,
+
+                                  codparcpatente,
+
+                                  ROUND(((vlr_receita_bruta_total +
+                                        receita_complementar +/* (CASE
+                                          
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                                           0
+                                          ELSE
+                                           receita_frete
+                                        
+END) + */teste_debit) -
+                                        (vlr_desc_com + /*desconto_contratual +*/
+                                        devolucao_realocacao +
+                                        devolucao_perda + outras_devolucoes +
+                                        teste_credit)),
+
+                                        2),
+
+                                  vlr_receita_bruta_total,
+
+                                  CODPAIS,
+
+                                  ROMANEIO) vlr_com_venda_terc,
+
+               0 vlr_com_venda_tercc,
+
+               COALESCE(CUSTO_COLHEITA_MANGA,
+0) colheita,
+
+               COALESCE(vlr_com_venda,
+0) vlr_com_venda,
+
+               COALESCE(CUSTO_IMP_SALDO,
+0) CUSTO_IMP_SALDO,
+
+               COALESCE(CUSTO_MP,
+0) custo_mp,
+
+               COALESCE(CUSTOMEDIO,
+0) CUSTOMEDIO,
+
+               COALESCE(CUSTO_EMBALAGEM,
+0) custo_embalagem,
+
+               COALESCE(FRETE_RURAL,
+0) frete_rural,
+
+               COALESCE(CUSTO_DIRETO_MI,
+0) custos_diretos_mi,
+
+               COALESCE(CUSTO_FRETE_ROD,
+0) frete_rodoviario,
+
+               (CASE
+                 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                  (CASE
+                    
+WHEN COALESCE(CUSTO_FRETE_MAR,
+0) > 0 THEN
+                    --receita_frete - COALESCE(CUSTO_FRETE_MAR,
+0)
+                     COALESCE(CUSTO_FRETE_MAR,
+0)
+                    ELSE
+                     0
+                  
+END)
+                 ELSE
+                  0
+               
+END) frete_maritimo,
+
+               (CASE
+                 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                  (CASE
+                    
+WHEN COALESCE(CUSTO_FRETE_AER,
+0) > 0 THEN
+                     receita_frete - COALESCE(CUSTO_FRETE_AER,
+0)
+                    ELSE
+                     0
+                  
+END)
+                 ELSE
+                  0
+               
+END) frete_aereo,
+
+               0 frete_aereoc,
+
+               COALESCE(SEGURO_CRED,
+0) seguro_cred,
+
+               COALESCE(DESP_PORTUARIAS,
+0) DESP_PORTUARIAS,
+
+               COALESCE(PERDA_PACK,
+0) perda_pack,
+
+               COALESCE(CUSTO_DIRETO_ME,
+0) custos_diretos_me,
+
+               COALESCE(CUSTO_SERV,
+0) custos_servicos,
+
+               COALESCE(CUSTO_OPERACAO,
+0) custo_operacao,
+
+               COALESCE(PROVISAO_FORNECEDORES,
+0) PROVISAO_FORNECEDORES,
+
+               (COALESCE(CUSTO_COLHEITA_MANGA,
+0) + COALESCE(vlr_com_venda,
+0) +
+               desconto_comercial_mp + COALESCE(CUSTO_MP,
+0) +
+               COALESCE(CUSTO_IMP_SALDO,
+0) + COALESCE(CUSTO_EMBALAGEM,
+0) +
+               frete_rural + COALESCE(CUSTO_DIRETO_MI,
+0) + 
+               (CASE
+                 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT'/*,
+'FOB'*/) THEN
+                  (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) +
+                  COALESCE(CUSTO_FRETE_AER,
+0))
+                 ELSE
+                  0
+               
+END) 
+               +COALESCE(DESP_PORTUARIAS,
+0) + COALESCE(SEGURO_CRED,
+0) +
+               COALESCE(PERDA_PACK,
+0) + COALESCE(CUSTO_DIRETO_ME,
+0) +
+               COALESCE(custo_etiquetagem,
+0) + COALESCE(CUSTO_SERV,
+0) +
+               COALESCE(CUSTO_OPERACAO,
+0) +
+               FU_BMC_GETROYALTIES(data,
+
+                                    CODPRODUTOR,
+
+                                    codvariedademp,
+
+                                    codparcpatentemp,
+
+                                    ROUND(((vlr_receita_bruta_total +
+                                          receita_complementar +/* (CASE
+                                            
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                                             0
+                                            ELSE
+                                             receita_frete
+                                          
+END) + */ teste_debit) -
+                                          (vlr_desc_com +
+                                         /* desconto_contratual +*/
+                                          devolucao_realocacao +
+                                          devolucao_perda +
+                                          outras_devolucoes + teste_credit)),
+
+                                          2),
+
+                                          MERCADO) +
+               FU_BMC_GETCOMVENDA('TERCEIROS',
+
+                                   data,
+
+                                   CODFRUTA,
+
+                                   CODPRODUTOR,
+
+                                   codvariedademp,
+
+                                   CODPARC,
+
+                                   MERCADO,
+
+                                   CODPROJ,
+
+                                   codparcpatente,
+
+                                   ROUND(((vlr_receita_bruta_total +
+                                         receita_complementar +/*(CASE
+                                           
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                                            0
+                                           ELSE
+                                            receita_frete
+                                         
+END) + */teste_debit) -
+                                         (vlr_desc_com + /*desconto_contratual +*/
+                                         devolucao_realocacao +
+                                         devolucao_perda +
+                                         outras_devolucoes + teste_credit)),
+
+                                         2),
+
+                                   vlr_receita_bruta_total,
+
+                                   CODPAIS,
+
+                                   ROMANEIO)) custo_calculado,
+
+                                   
+               0 custo_calculadoC,
+
+                                   
+               COALESCE(custo_prev_frete_parc,
+0) as custofreteger,
+
+               COALESCE(custo_prev_etiq_parc * QTDNEG,
+0) AS custoetiqger,
+
+               status_comercial,
+
+               descger,
+
+               OBSERVACAO,
+
+               (CASE
+                 
+WHEN FRUTA = 'AVOCADO' THEN
+                  (((vlr_receita_bruta_total + receita_complementar + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     0
+                    ELSE
+                     receita_frete
+                  
+END) + teste_debit) -
+                  (vlr_desc_com + /*desconto_contratual +*/
+                  devolucao_realocacao + devolucao_perda +
+                  outras_devolucoes + teste_credit)) -
+                  (COALESCE(CUSTO_COLHEITA_MANGA,
+0) + COALESCE(vlr_com_venda,
+0) +
+                  desconto_comercial_mp + COALESCE(CUSTO_MP,
+0) +
+                  COALESCE(CUSTO_IMP_SALDO,
+0) + COALESCE(CUSTO_EMBALAGEM,
+0) +
+                  frete_rural + COALESCE(CUSTO_DIRETO_MI,
+0) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT',
+'FOB') THEN
+                     (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) +
+                     COALESCE(CUSTO_FRETE_AER,
+0))
+                    ELSE
+                     0
+                  
+END) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     (CASE
+                       
+WHEN COALESCE(CUSTO_FRETE_MAR,
+0) > 0 THEN
+                        receita_frete - COALESCE(CUSTO_FRETE_MAR,
+0)
+                       ELSE
+                        0
+                     
+END)
+                    ELSE
+                     0
+                  
+END) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     (CASE
+                       
+WHEN COALESCE(CUSTO_FRETE_AER,
+0) > 0 THEN
+                        receita_frete - COALESCE(CUSTO_FRETE_AER,
+0)
+                       ELSE
+                        0
+                     
+END)
+                    ELSE
+                     0
+                  
+END) + COALESCE(DESP_PORTUARIAS,
+0) + COALESCE(SEGURO_CRED,
+0) +
+                  COALESCE(PERDA_PACK,
+0) + COALESCE(CUSTO_DIRETO_ME,
+0) +
+                  COALESCE(CUSTO_SERV,
+0) +
+                  COALESCE(CUSTO_OPERACAO,
+0 + COALESCE(PROVISAO_FORNECEDORES,
+0))) -
+                  DESP_PORTUARIAS)
+                 
+when FRUTA = 'UVA' 
+and prv = 'S' THEN
+                  (((vlr_receita_bruta_total + receita_complementar + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     0
+                    ELSE
+                     receita_frete
+                  
+END) + teste_debit) -
+                  (vlr_desc_com + /*desconto_contratual +*/
+                  devolucao_realocacao + devolucao_perda +
+                  outras_devolucoes + teste_credit)) -
+                  (COALESCE(CUSTO_COLHEITA_MANGA,
+0) + COALESCE(vlr_com_venda,
+0) +
+                  desconto_comercial_mp + COALESCE(CUSTO_MP,
+0) +
+                  COALESCE(CUSTO_IMP_SALDO,
+0) + COALESCE(CUSTO_EMBALAGEM,
+0) +
+                  frete_rural + COALESCE(CUSTO_DIRETO_MI,
+0) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT',
+'FOB') THEN
+                     (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) +
+                     COALESCE(CUSTO_FRETE_AER,
+0))
+                    ELSE
+                     0
+                  
+END) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     (CASE
+                       
+WHEN COALESCE(CUSTO_FRETE_MAR,
+0) > 0 THEN
+                        receita_frete - COALESCE(CUSTO_FRETE_MAR,
+0)
+                       ELSE
+                        0
+                     
+END)
+                    ELSE
+                     0
+                  
+END) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     (CASE
+                       
+WHEN COALESCE(CUSTO_FRETE_AER,
+0) > 0 THEN
+                        receita_frete - COALESCE(CUSTO_FRETE_AER,
+0)
+                       ELSE
+                        0
+                     
+END)
+                    ELSE
+                     0
+                  
+END) + COALESCE(DESP_PORTUARIAS,
+0) + COALESCE(SEGURO_CRED,
+0) +
+                  COALESCE(PERDA_PACK,
+0) + COALESCE(CUSTO_DIRETO_ME,
+0) +
+                  COALESCE(CUSTO_SERV,
+0) +
+                  COALESCE(CUSTO_OPERACAO,
+0 + COALESCE(PROVISAO_FORNECEDORES,
+0))) -
+                  DESP_PORTUARIAS)
+                 else
+                  0
+               
+END) PROVISAO_FORNECEDOR_GER,
+
+               CUSTOUNITGER AS CUSTOUNITARIOGER,
+
+               TXADM_CUSTO_GER,
+
+			 CASE 
+			    
+WHEN FRUTA = 'MANGA' THEN 
+			        (COALESCE(CUSTO_MP,
+0) +
+			        (CASE 
+			            
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) + COALESCE(CUSTO_FRETE_AER,
+0)) 
+			            
+ELSE 0 
+			         
+END) +
+			        (CUSTOUNITGER * QTDNEG) + COALESCE(SEGURO_CRED,
+0) + COALESCE(custo_prev_frete_parc * QTDNEG,
+0) + COALESCE((custo_prev_etiq_parc) * QTDNEG,
+0) + COALESCE(DESP_PORTUARIAS,
+0) +
+			        COALESCE(FUN_ARG_VLRETIQSRV(to_number(nropallet)) * QTDNEG,
+0) + COALESCE(PERDA_PACK,
+0))
+			
+			    
+WHEN FRUTA IN ('UVA') THEN 
+			        (COALESCE(CUSTO_MP,
+0) +
+			        (CASE 
+			            
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) + COALESCE(CUSTO_FRETE_AER,
+0)) 
+			            
+ELSE 0 
+			         
+END) +
+			        (CUSTOUNITGER * QTDNEG) + COALESCE(SEGURO_CRED,
+0) + COALESCE(custo_prev_frete_parc * QTDNEG,
+0) + COALESCE((custo_prev_etiq_parc) * QTDNEG,
+0) + COALESCE(DESP_PORTUARIAS,
+0) +
+			        COALESCE(FUN_ARG_VLRETIQSRV(to_number(nropallet)) * QTDNEG,
+0) + COALESCE(custo_etiquetagem,
+0) +
+			        COALESCE(FU_BMC_GETROYALTIES(data,
+CODPRODUTOR,
+codvariedademp,
+codparcpatentemp,
+
+			            ROUND(((vlr_receita_bruta_total + receita_complementar +
+			            (CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0
+			                  
+ELSE receita_frete 
+END) + teste_debit) - (vlr_desc_com + /*desconto_contratual + */ devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit)),
+2),
+MERCADO),
+0) +
+			        COALESCE(FU_BMC_GETCOMVENDA('TERCEIROS',
+data,
+CODFRUTA,
+CODPRODUTOR,
+codvariedademp,
+CODPARC,
+MERCADO,
+CODPROJ,
+codparcpatente,
+
+			            ROUND(((vlr_receita_bruta_total + receita_complementar + (CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0 
+ELSE receita_frete 
+END) + teste_debit) -
+			            (vlr_desc_com + /*desconto_contratual + */devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit)),
+2),
+vlr_receita_bruta_total,
+CODPAIS,
+ROMANEIO),
+0))
+			
+			    
+ELSE 
+			        (COALESCE(CUSTO_MP,
+0) + COALESCE(CUSTO_IMP_SALDO,
+0) + COALESCE(CUSTO_EMBALAGEM,
+0) + COALESCE(CUSTO_DIRETO_ME,
+0) +
+			         COALESCE(CUSTO_DIRETO_MI,
+0) + COALESCE(custo_etiquetagem,
+0) + COALESCE(CUSTO_SERV,
+0) + COALESCE(CUSTO_OPERACAO,
+0) +
+			         (CASE 
+			            
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) + COALESCE(CUSTO_FRETE_AER,
+0)) 
+			            
+ELSE 0 
+			          
+END) +
+			         COALESCE(SEGURO_CRED,
+0) + COALESCE(custo_prev_frete_parc * QTDNEG,
+0) + COALESCE((custo_prev_etiq_parc) * QTDNEG,
+0) +
+			         COALESCE(DESP_PORTUARIAS,
+0) + COALESCE(FUN_ARG_VLRETIQSRV(to_number(nropallet)) * QTDNEG,
+0) + COALESCE(PERDA_PACK,
+0) +
+			         COALESCE(FU_BMC_GETROYALTIES(data,
+CODPRODUTOR,
+codvariedademp,
+codparcpatentemp,
+
+			            ROUND(((vlr_receita_bruta_total + receita_complementar +
+			            (CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0
+			                  
+ELSE receita_frete 
+END) + teste_debit) - (vlr_desc_com + /*desconto_contratual + */ devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit)),
+2),
+MERCADO),
+0) +
+			         COALESCE(FU_BMC_GETCOMVENDA('TERCEIROS',
+data,
+CODFRUTA,
+CODPRODUTOR,
+codvariedademp,
+CODPARC,
+MERCADO,
+CODPROJ,
+codparcpatente,
+
+			            ROUND(((vlr_receita_bruta_total + receita_complementar + (CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0 
+ELSE receita_frete 
+END) + teste_debit) -
+			            (vlr_desc_com +/* desconto_contratual + */devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit)),
+2),
+vlr_receita_bruta_total,
+CODPAIS,
+ROMANEIO),
+0))
+			END AS CUSTOTOTALGER,
+
+            CASE 
+WHEN PROCESSO<>'REFUGO MP' 
+				THEN   (CASE
+                 
+WHEN FRUTA = 'AVOCADO' THEN
+                  0
+                 ELSE
+                  (((vlr_receita_bruta_total + receita_complementar + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     0
+                    ELSE
+                     receita_frete
+                  
+END) + teste_debit) -
+                  (vlr_desc_com + /*desconto_contratual +*/
+                  devolucao_realocacao + devolucao_perda +
+                  outras_devolucoes + teste_credit +
+                  COALESCE((custo_prev_desc_parc) * QTDNEG,
+0))) -
+                  (COALESCE(vlr_com_venda,
+0) + desconto_comercial_mp +
+                  COALESCE(CUSTO_MP,
+0) + COALESCE(CUSTO_IMP_SALDO,
+0) +
+                  COALESCE(CUSTO_EMBALAGEM,
+0) + COALESCE(DESP_PORTUARIAS,
+0) +
+                  COALESCE(SEGURO_CRED,
+0) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT',
+'FOB') THEN
+                     (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) +
+                     COALESCE(CUSTO_FRETE_AER,
+0))
+                    ELSE
+                     0
+                  
+END) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     (CASE
+                       
+WHEN COALESCE(CUSTO_FRETE_MAR,
+0) > 0 THEN
+                        receita_frete - COALESCE(CUSTO_FRETE_MAR,
+0)
+                       ELSE
+                        0
+                     
+END)
+                    ELSE
+                     0
+                  
+END) + (CASE
+                    
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN
+                     (CASE
+                       
+WHEN COALESCE(CUSTO_FRETE_AER,
+0) > 0 THEN
+                        receita_frete - COALESCE(CUSTO_FRETE_AER,
+0)
+                       ELSE
+                        0
+                     
+END)
+                    ELSE
+                     0
+                  
+END) + COALESCE(PERDA_PACK,
+0) +
+                  COALESCE(custo_prev_frete_parc * QTDNEG,
+0) +
+                  COALESCE((custo_prev_etiq_parc) * QTDNEG,
+0) +
+                  (CUSTOUNITGER * QTDNEG)))
+               
+END) 
+ELSE 0 
+END AS MARGEMGER,
+
+				CASE 
+WHEN PROCESSO<>'REFUGO MP' 
+				THEN COALESCE((
+							CASE 
+WHEN FU_BMC_GETPERCCOMVENDA('COMERCIAL',
+
+																DATA,
+
+																CODFRUTA,
+
+																CODPRODUTOR,
+
+																codvariedademp,
+
+																CODPARC,
+
+																MERCADO,
+
+																CODPROJ,
+
+																codparcpatente,
+
+																ROUND(((vlr_receita_bruta_total + receita_complementar +
+																(CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0 
+ELSE receita_frete 
+END) + teste_debit) -
+																(vlr_desc_com + /*desconto_contratual + */ devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit)),
+2),
+vlr_receita_bruta_total,
+CODPAIS,
+ROMANEIO)/* % COMISSÃO COMERCIAL*/> 0 
+																THEN
+																FU_BMC_GETPERCCOMVENDA('COMERCIAL',
+
+																DATA,
+
+																CODFRUTA,
+
+																CODPRODUTOR,
+
+																codvariedademp,
+
+																CODPARC,
+
+																MERCADO,
+
+																CODPROJ,
+
+																codparcpatente,
+
+																ROUND(((vlr_receita_bruta_total + receita_complementar +
+																	(CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0 
+ELSE receita_frete 
+END) + teste_debit) -
+																(vlr_desc_com + /* desconto_contratual + */ devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit)),
+2),
+vlr_receita_bruta_total,
+CODPAIS,
+ROMANEIO)/* % COMISSÃO COMERCIAL*/ 
+																ELSE
+																(/*PARTE QUE FAZ PERCMARGEMGER PARA FRUTAS QUE NÃO PROVISIONAM*/
+																 (
+																	(
+																		(vlr_receita_bruta_total + receita_complementar +(CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0 
+ELSE receita_frete 
+END) + teste_debit) -
+																		(vlr_desc_com + /*desconto_contratual + */ devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit + COALESCE((custo_prev_desc_parc)* QTDNEG,
+0)))/*RECEITA LIQ*/- (COALESCE(vlr_com_venda,
+0) + desconto_comercial_mp + COALESCE(CUSTO_MP,
+0) +
+																	(CASE 
+WHEN fruta IN ('UVA',
+'MANGA') THEN (CUSTOUNITGER * QTDNEG) 
+ELSE (COALESCE(CUSTO_IMP_SALDO,
+0) + COALESCE(CUSTO_EMBALAGEM,
+0) + COALESCE(CUSTO_DIRETO_ME,
+0) +
+																	 COALESCE(custo_etiquetagem,
+0) + COALESCE(CUSTO_SERV,
+0) + COALESCE(CUSTO_OPERACAO,
+0)) 
+END)/*UVA E MANGA usam ficha de custo*/ +
+																	(CASE 
+WHEN inconterms NOT IN ('CIF',
+'CIP',
+'CPT') THEN (COALESCE(CUSTO_FRETE_MAR,
+0) + COALESCE(CUSTO_FRETE_ROD,
+0) + COALESCE(CUSTO_FRETE_AER,
+0))
+																		  
+ELSE 0 
+END) +
+																COALESCE(SEGURO_CRED,
+0) + COALESCE(custo_prev_frete_parc * QTDNEG,
+0) + COALESCE((custo_prev_etiq_parc) * QTDNEG,
+0) + COALESCE(DESP_PORTUARIAS,
+0) +
+																COALESCE((FUN_ARG_VLRETIQSRV(to_number(nropallet))* QTDNEG),
+0) + COALESCE(PERDA_PACK,
+0))/*CUSTOS*/) / 
+																		NULLIF(ROUND(
+																		((vlr_receita_bruta_total + receita_complementar +(CASE 
+WHEN inconterms IN ('CIF',
+'CIP',
+'CPT') THEN 0 
+ELSE receita_frete 
+END) + teste_debit) -
+																		(vlr_desc_com + /*desconto_contratual + */ devolucao_realocacao + devolucao_perda + outras_devolucoes + teste_credit + COALESCE((custo_prev_desc_parc)* QTDNEG,
+0)/*RECEITA LIQ*/)),
+2),
+0)) * 100 
+							END)
+				,
+0) 
+ELSE 0 
+END AS PERCMARGEMGER,
+
+               etd,
+
+               eta,
+
+               AD_EX_CONTAINER,
+
+               PORTO_ORIGEM,
+
+               PORTO_DESTINO,
+
+               VESSEL,
+
+               custo_etiquetagem,
+
+               pais,
+
+               CODPAIS,
+
+               prv,
+
+               ROYALT,
+
+               MERCADO,
+
+               OBS1,
+
+			   OBS2,
+
+			   LOSS,
+
+			   STCOM,
+
+			   CLIREALOC,
+
+			   ETDR,
+
+			   ETAR,
+
+			   CREDIT_MOE,
+
+			   DEBIT_MOE,
+
+			   OPEN_AMOUNT,
+
+			   BOOKING,
+
+			   LINER,
+
+			   DTENTROM,
+
+			   LOC_ENT,
+
+               DB_VLRTOT,
+
+		       CR_VLRTOT
+          
+FROM
+(
+          
+          
+          		  SELECT
+codregra,
+
+					     regra,
+
+					     ROYALT,
+
+					     MERCADO,
+
+					     semana,
+
+					     codemp,
+
+					     FRUTA,
+
+					     codfruta,
+
+					     ETD,
+
+					     ETA,
+
+					     AD_EX_CONTAINER,
+
+					     pais,
+
+					     CODPAIS,
+
+					     VESSEL,
+
+					     PORTO_ORIGEM,
+
+					     PORTO_DESTINO,
+
+					     prv,
+
+					     vlr_total_cx_liquida,
+
+					     ano,
+
+					     processo,
+
+					     qtdpallet,
+
+					     loteargo,
+
+					     codprodutor,
+
+					     nomeprodutor,
+
+					     nropallet,
+
+					     nome_cliente,
+
+					     tipo_cx,
+
+					     data,
+
+					     mes,
+
+					     codvariedade,
+
+					     variedade,
+
+					     codvariedademp,
+
+					     variedademp,
+
+					     CODPRODCX,
+
+					     DESCRPRODCX,
+
+					     ROMANEIO,
+
+					     NFENTRADAMP,
+
+					     DTENTRADAMP,
+
+					     nunotamp,
+
+					     nunota,
+
+					     nf,
+
+					     chavenfe,
+
+					     sequencia,
+
+					     moeda,
+
+					     vlr_cotacao,
+
+					     inconterms,
+
+					     codprod,
+
+					     descrprod,
+
+					     N1.CODLOCALORIG,
+
+					     qtdneg,
+
+					     qtdnegite,
+
+					     qtddevvenda,
+
+					     vlr_kg,
+
+					     vlr_desc_com,
+
+					     vlr_com_venda,
+
+					     (N1.pesoliqpro * N1.qtdbase) peso_tot_liq,
+
+					     (N1.vlr_preco_venda * COALESCE(N1.qtdmp,
+N1.qtdnegite)) vlr_receita_bruta_total,
+
+					     vlr_claim,
+
+					     vlr_outras_dev,
+
+					     vlr_preco_venda,
+
+					     vlr_prov_desc,
+
+					     desconto_comercial_mp,
+
+					     NATUREZA,
+
+					     CODNATUREZA,
+
+					     CENTRO_RESULTADO,
+
+					     CODCENTRO,
+
+					     codparc,
+
+					     OPERACAO,
+
+					     vlrnota,
+
+					     controle,
+
+					     codtipoper,
+
+					     vlrfrete,
+
+					     tipmov,
+
+					     codproj,
+
+					     codparcpatente,
+
+					     PERCDESCCONTRATUAL,
+
+					     (SELECT
+pat.codparc
+					        
+FROM
+AD_TGFGRUPATENTES pat
+					       
+WHERE
+pat.codgrupoprod = codvariedademp
+					         
+AND TRUNC(data) BETWEEN TRUNC(pat.DTVIGENCIAINICIO) AND
+					             TRUNC(pat.DTVIGENCIAFIM)
+					         AND rownum = 1) codparcpatentemp,
+
+					     (select
+pr.observacao
+					        
+from
+AD_CUSTOSPREV pr
+					       
+where
+pr.CODPROJ = N1.codproj
+					         
+and (
+pr.codparc = N1.codprodutor or
+					             pr.codparc is null
+)
+					         
+and pr.TIPOCUSTO = 'OBS') OBSERVACAO,
+
+					     ((select
+pr.STATUSCOMERC
+					         
+from
+AD_CUSTOSPREV pr
+					        
+where
+pr.NUNOTA = N1.nunota
+					          
+and (
+pr.codparc = N1.codprodutor or
+					              pr.codparc is null
+)
+					          
+and pr.TIPOCUSTO = 'COMERC')) AS status_comercial,
+
+					     ROUND(FU_BMC_GETCUSTOPREVISTO(N1.codproj,
+
+					                                   N1.codprodutor,
+
+					                                   'DESC'),
+
+					           2) custo_prev_desc_parc,
+
+					     /*ROUND(FU_BMC_GETCUSTOPREVISTO(N1.codproj,
+
+					                             N1.codprodutor,
+
+					                             'FRETE'),
+
+					     2) custo_prev_frete_parc,
+*/
+					
+					    /* ROUND((COALESCE((FU_BMC_GETCUSTOFRETEGER(N1.codproj) /
+					                nullif(N1.qtdnegnota,
+0)) * N1.qtdbase,
+
+					                0)),
+
+					           2) */0 custo_prev_frete_parc,
+
+					
+					     ROUND(FU_BMC_GETCUSTOPREVISTO(N1.codproj,
+
+					                                   N1.codprodutor,
+
+					                                   'ETIQ'),
+
+					           2) custo_prev_etiq_parc,
+
+					     ROUND(FU_BMC_GETCUSTOPREVISTO(N1.codproj,
+
+					                                   N1.codprodutor,
+
+					                                   'CRED'),
+
+					           2) custo_prev_cred_parc,
+
+					     ROUND(COALESCE((FU_BMC_GETCUSTOPREVISTO(N1.codproj,
+
+					                                        N1.codprodutor,
+
+					                                        'ETIQREAL') *
+					               N1.qtdbase),
+
+					               0),
+
+					           2) custo_etiquetagem,
+
+					     COALESCE((COALESCE((select
+pr.VALOR
+					                
+from
+AD_CUSTOSPREV pr
+					               
+where
+pr.CODPROJ = N1.codproj
+					                 
+and (pr.codparc = N1.codprodutor or
+					                     pr.codparc is null)
+					                 
+and (pr.codprod = N1.codprod or
+					                     pr.codprod is null)
+					                 
+and pr.TIPOCUSTO = 'DESC'),
+
+					              0) * QTDNEG) +
+					         COALESCE((select
+pr.VALOR
+					               
+from
+AD_CUSTOSPREV pr
+					              
+where
+pr.CODPROJ = N1.codproj
+					                
+and (pr.codparc = N1.codprodutor or
+					                    pr.codparc is null)
+					                
+and (pr.codprod = N1.codprod or
+					                    pr.codprod is null)
+					                
+and pr.TIPOCUSTO = 'CRED'),
+
+					             0) * QTDNEG,
+
+					         0) AS descger,
+
+					     ROUND(CASE 
+WHEN N1.PROCESSO LIKE 'REFUGO MP%' THEN 0 
+ELSE COALESCE((((SELECT
+SUM(v.VLRTOT)
+					                    
+FROM
+VW_BMC_BI_PERCA_PACK v
+					                   
+WHERE
+v.CODPROD = N1.codprodite
+					                     
+AND v.CONTROLE = N1.CONTROLE
+					                     
+and v.codlocalorig = N1.CODLOCALORIG) /
+					               NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase),
+
+					               0) 
+END,
+
+					           2) AS PERDA_PACK,
+
+					
+					     ROUND(COALESCE((case
+					                 
+when (COALESCE((N1.vlrdevvendasemrefugo),
+0) /
+					                      NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					                  0
+					                 else
+					                  (SELECT
+MAX(vlrcustoUNIT)
+					                     
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					                    
+WHERE
+N1.nropallet = v.NROUNICO /*v.nunota = N1.nunotamp*/
+					                      
+AND N1.codprodutor = v.codprodutor
+					                      --
+AND N1.qtdpallet = v.qtd
+					                      
+AND N1.lotemp = v.lotemp
+					                      
+AND v.colheita = 'S') * (n1.qtdbase)
+					               
+end),
+
+					               0),
+
+					           2) AS CUSTO_COLHEITA_MANGA,
+
+					
+					     ROUND((SELECT
+MAX(vlrcustoUNIT)
+					             
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					            
+WHERE
+N1.nropallet = v.NROUNICO
+					              
+AND N1.codprodutor = v.codprodutor
+					              --
+AND N1.qtdpallet = v.qtd
+					              
+AND N1.lotemp = v.lotemp
+					              
+AND v.implantacaosaldo = 'S'),
+
+					           2) * (n1.qtdbase) CUSTO_IMP_SALDO,
+
+					
+					     ROUND((SELECT
+sum(VLRCUSTO)/max(qtd) --vlrcustoUNIT
+					             
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					            
+WHERE
+N1.nropallet = v.NROUNICO
+					              
+AND N1.codprodutor = v.codprodutor
+					              --
+AND N1.qtdpallet = v.qtd
+					              
+AND N1.lotemp = v.lotemp
+					              
+AND v.embalagem = 'S'),
+
+					           2) * (n1.qtdbase) 
+					           AS CUSTO_EMBALAGEM,
+
+					
+					     ROUND(COALESCE((case
+					                 
+when N1.MERCADO = 'ME' then
+					                  0
+					                 
+when (COALESCE((vlrdevvendasemrefugo),
+0) /
+					                      NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					                  0
+					                 else
+					                  (SELECT
+sum(VLRCUSTO)/max(qtd)
+					                     
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					                    
+WHERE
+N1.nropallet = v.NROUNICO /*v.nunota = N1.nunotamp*/
+					                      
+AND N1.codprodutor = v.codprodutor
+					                      --
+AND N1.qtdpallet = v.qtd
+					                      
+AND N1.lotemp = v.lotemp
+					                      
+AND v.direto = 'S') * (n1.qtdbase)
+					               
+end),
+
+					               0),
+
+					           2) AS CUSTO_DIRETO_MI,
+
+					
+					     ROUND(COALESCE((case
+					                 
+when N1.MERCADO = 'MI' then
+					                  0
+					                 
+when (COALESCE((vlrdevvendasemrefugo),
+0) /
+					                      NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					                  0
+					                 else
+					                  (SELECT
+sum(VLRCUSTO)/max(qtd)
+					                     
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					                    
+WHERE
+N1.nropallet = v.NROUNICO /*v.nunota = N1.nunotamp*/
+					                      
+AND N1.codprodutor = v.codprodutor
+					                      --
+AND N1.qtdpallet = v.qtd
+					                      
+AND N1.lotemp = v.lotemp
+					                      
+AND v.direto = 'S') * (n1.qtdbase)
+					               
+end),
+
+					               0),
+
+					           2) AS CUSTO_DIRETO_ME,
+
+					
+					     COALESCE((CASE
+					           
+WHEN NVL(CUSTO_MP_CALC,
+0) = 0 THEN
+					            ROUND((SELECT
+max(COALESCE(vlrcustocalibreunit,
+
+					                                 vlrcustoprecoentradaunit))
+					                    
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					                   
+WHERE
+N1.nropallet = v.NROUNICO
+					                     
+AND N1.codprodutor = v.codprodutor
+					                     --
+AND N1.qtdpallet = v.qtd
+					                     
+AND N1.lotemp = v.lotemp
+					                     
+AND v.mp = 'S'),
+
+					                  2) * (n1.PESOLIQPRO*n1.qtdbase) 
+					           ELSE
+					            CUSTO_MP_CALC
+					         
+END),
+
+					         0) AS CUSTO_MP,
+
+					     CASE 
+WHEN FRUTA='MANGA' 
+					     THEN N1.CUSTOMEDIO * (n1.PESOLIQPRO*n1.qtdbase) 
+					     
+ELSE COALESCE((CASE
+					           
+WHEN NVL(CUSTO_MP_CALC,
+0) = 0 THEN
+					            ROUND((SELECT
+max(COALESCE(vlrcustocalibreunit,
+
+					                                 vlrcustoprecoentradaunit))
+					                    
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					                   
+WHERE
+N1.nropallet = v.NROUNICO
+					                     
+AND N1.codprodutor = v.codprodutor
+					                     --
+AND N1.qtdpallet = v.qtd
+					                     
+AND N1.lotemp = v.lotemp
+					                     
+AND v.mp = 'S'),
+
+					                  2) * (n1.PESOLIQPRO*n1.qtdbase) 
+					           ELSE
+					            CUSTO_MP_CALC
+					         
+END),
+
+					         0) 
+END AS CUSTOMEDIO,
+
+					         
+					     ROUND(COALESCE((case
+					                 
+when (COALESCE((vlrdevvendasemrefugo),
+0) /
+					                      NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					                  0
+					                 else
+					                  (SELECT
+sum(VLRCUSTO)/max(qtd)
+					                     
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					                    
+WHERE
+N1.nropallet = v.NROUNICO /*v.nunota = N1.nunotamp*/
+					                      
+AND N1.codprodutor = v.codprodutor
+					                      --
+AND N1.qtdpallet = v.qtd
+					                      
+AND N1.lotemp = v.lotemp
+					                      
+AND v.operacao = 'S') * (n1.qtdbase)
+					               
+end),
+
+					               0),
+
+					           2) AS CUSTO_OPERACAO,
+
+					
+					     (case
+					       
+when (COALESCE((vlrdevvendasemrefugo),
+0) /
+					            NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					        0
+					       else
+					        ((SELECT
+sum(VLRCUSTO)/max(qtd)
+					            
+FROM
+VW_BMC_BI_CUSTOS_PROD_OTM v
+					           
+WHERE
+N1.nropallet = v.NROUNICO /*v.nunota = N1.nunotamp*/
+					             
+AND N1.codprodutor = v.codprodutor
+					             --
+AND N1.qtdpallet = v.qtd
+					             
+AND N1.lotemp = v.lotemp
+					             
+AND v.servico = 'S') * (n1.qtdbase)) + (case
+					          
+when N1.ROYALT = 'S' then
+					           ((select
+sum(vlrlanc)
+					               
+from
+tcblan
+					              
+where
+codctactb = 205
+					                
+and tiplanc = 'D') /
+					           (select
+sum(qtdneg)
+					               
+from
+tgfite it
+					              
+inner join
+tgfpro pro1
+					                 
+on pro1.codprod = it.codprod
+					              
+inner join
+tgfgru gr
+					                 
+on gr.codgrupoprod = pro1.codgrupoprod
+					              
+where
+gr.ad_royalts = 'S') * N1.qtdnegite)
+					          else
+					           0
+					        
+end)
+					     
+end) AS CUSTO_SERV,
+
+					
+					     (case
+					       
+when (COALESCE((N1.vlrdevvendasemrefugo),
+0) /
+					            NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					        0
+					       else
+					        (SELECT
+FU_BMC_PRECO_CUSTO_GER(N1.data,
+
+					                                       N1.AD_CULTIVAR,
+
+					                                       N1.AD_MERCADOPAI,
+
+					                                       N1.CODGRUPOPROD,
+
+					                                       N1.AD_MODAL,
+
+					                                       pesoliqpro,
+
+					                                       N1.codprodutor,
+
+					                                       N1.ROMANEIO
+					                                       ,
+N1.LOC_ENT
+					                                       )
+					           
+FROM
+DUAL)/* + (NVL((SELECT
+SUM(VW.VLRPORKG) 
+FROM
+VW_CUSTO_FRIOKG VW 
+WHERE
+VW.NROUNICO=N1.NROPALLET ),
+0) * pesoliqpro)
+					           + (NVL((SELECT
+SUM(CA.VLRAPLIC )
+									FROM AD_MONTPALLET AM 
+									JOIN AD_STATUSPLT ST 
+ON ST.CODSTATUS = AM.CODSTATUS 
+AND ST.AGCUSTO = 'SMARTFRESH'
+									JOIN AD_CUSTOSGERAD CA 
+ON CA.DESCRICAO = 'SMARTFRESH' 
+AND CA.TIPOAPL = 'CX' 
+AND AM.NROUNICO=N1.NROPALLET
+									),
+0))*/
+					     
+end) AS CUSTOUNITGER,
+
+					     (SELECT
+FU_ARG_TXADM_CUSTO_GER(N1.data,
+
+                           N1.AD_CULTIVAR,
+
+                           N1.AD_MERCADOPAI,
+
+                           N1.CODGRUPOPROD,
+
+                           N1.AD_MODAL,
+
+                           N1.pesoliqpro,
+
+                           N1.codprodutor,
+
+                           N1.ROMANEIO,
+
+                           N1.LOC_ENT) 
+                         
+FROM
+DUAL)
+                          AS TXADM_CUSTO_GER,
+
+					
+					     ROUND((case
+					             
+when (COALESCE((vlrdevvendasemrefugo),
+0) /
+					                  NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 then
+					              0
+					             else
+					              (CASE
+					                
+WHEN COALESCE(N1.PERCDESCCONTRATUAL,
+0) <> 0 THEN
+					                 (N1.qtdbase * N1.vlr_preco_venda *
+					                 COALESCE(N1.PERCDESCCONTRATUAL,
+0)) / 100
+					                ELSE
+					                 0
+					              
+END)
+					           
+end),
+
+					           2) as desconto_contratual,
+
+					
+					     CASE 
+WHEN  N1.PROCESSO LIKE '%._'  THEN 0 
+ELSE (ROUND(nullif((N1.qtdbase *
+					                  ((FR3.FR3vlrunit) /
+					                  nullif(qtdnegnota,
+0))),
+
+					                  0),
+
+					           2)
+					      + ROUND((COALESCE(N1.PED_LOG,
+0) /
+					               nullif(qtdnegnota,
+0)) * N1.qtdbase,
+
+					              2)
+					     ) * PERCENTUAL 
+END AS DESP_PORTUARIAS,
+
+					
+					     ROUND((CASE
+					             
+WHEN N1.INCONTERMS IN ('CIF',
+'CIP',
+'CPT') THEN
+					              ((COALESCE(((CASE
+					                      
+WHEN N1.CIF_FOB = 'C' THEN
+					                       (SELECT
+(N1.vlrfrete / NULLIF(vlrtotnota,
+0)) *
+					                               N1.qtdbase * N1.vlr_preco_venda
+					                          
+FROM
+dual)
+					                      ELSE
+					                       0
+					                    
+END)),
+
+					                    0) ))-- NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase)
+					             ELSE
+					              0
+					           
+END),
+
+					           2) receita_frete,
+
+					
+					     (COALESCE((SELECT
+SUM(i.vlrtot)
+					            
+FROM
+TGFCAB c
+					           
+INNER JOIN
+TGFITE i
+					              
+ON i.nunota = c.nunota
+					           
+INNER JOIN
+TGFVAR v
+					              
+ON v.NUNOTAORIG = N1.nunota
+					             
+AND v.SEQUENCIAORIG = N1.sequencia
+					             
+AND v.NUNOTA = c.nunota
+					             
+AND v.sequencia = i.sequencia
+					           
+WHERE
+c.tipmov = 'D'
+					             
+AND c.codtipoper = 1228),
+
+					          0) / NULLIF(N1.qtdnegite,
+0)) *
+					     COALESCE(N1.qtdmp,
+N1.qtdnegite) devolucao_realocacao,
+--1228
+					
+					     (COALESCE((SELECT
+SUM(i.vlrtot)
+					            
+FROM
+TGFCAB c
+					           
+INNER JOIN
+TGFITE i
+					              
+ON i.nunota = c.nunota
+					           
+INNER JOIN
+TGFVAR v
+					              
+ON v.NUNOTAORIG = N1.nunota
+					             
+AND v.SEQUENCIAORIG = N1.sequencia
+					             
+AND v.NUNOTA = c.nunota
+					             
+AND v.sequencia = i.sequencia
+					           
+WHERE
+c.tipmov = 'D'
+					             
+AND c.codtipoper = 1227),
+
+					          0) / NULLIF(N1.qtdnegite,
+0)) *
+					     COALESCE(N1.qtdmp,
+N1.qtdnegite) devolucao_perda,
+--1227   
+					
+					     ROUND((COALESCE((vlrdevvendasemrefugo),
+0) /
+					           NULLIF(N1.qtdnegite,
+0)) *
+					           COALESCE(N1.qtdmp,
+N1.qtdnegite),
+
+					           2) outras_devolucoes,
+
+					
+					     ROUND((CASE
+					             
+WHEN N1.prv = 'S' 
+AND N1.variedade LIKE '%UVA%' THEN
+					              (vlrprovforn / N1.qtdnegcencus) * N1.qtdbase
+					             
+WHEN N1.variedade NOT LIKE '%UVA%' THEN
+					              (vlrprovforn / N1.qtdnegcencus) * N1.qtdbase
+					             ELSE
+					              0
+					           
+END),
+
+					           2) AS PROVISAO_FORNECEDORES,
+
+						--SELECT				
+					     ROUND((CASE
+					             
+WHEN N1.inconterms = 'EXW'  
+OR N1.PROCESSO LIKE '%._'  THEN
+					              0
+					             else
+					              COALESCE((CASE
+					                    
+WHEN N1.AD_MODAL = 'M' THEN
+					                     nullif((N1.qtdbase * ( CASE 
+WHEN FR2.FR2vlrunit IS NULL THEN N1.VLRFRMA 
+ELSE FR2.FR2vlrunit 
+END  /
+					                            nullif(qtdnegnota,
+0))),
+
+					                            0)
+					                    ELSE
+					                     0
+					                  
+END),
+
+					                  0)
+					           
+end),
+
+					           2) * PERCENTUAL as CUSTO_FRETE_MAR,
+
+					
+
+						CASE
+						    
+WHEN N1.inconterms = 'EXW' 
+OR N1.PROCESSO LIKE '%._' THEN 0
+						    ELSE
+						        COALESCE(
+						            NULLIF(
+						                ROUND(
+						                    COALESCE(
+						                        FR4.FR4VLRCTE,
+
+						                        CASE
+						                            
+WHEN COALESCE(N1.vlrnota * COALESCE(FR1.FR1VLR,
+0),
+0) = 0
+						                                THEN N1.PED_FR
+						                            
+ELSE N1.vlrnota * COALESCE(FR1.FR1VLR,
+0)
+						                        
+END,
+
+						                        CASE 
+WHEN N1.CIF_FOB = 'F' THEN NULL 
+ELSE N1.VLRFRETE 
+END,
+
+						                        N1.VLRCTE
+						                    ) / NULLIF(qtdnegnota,
+0) * NULLIF(N1.qtdbase,
+0),
+
+						                    2
+						                ),
+
+						                0  -- se o frete calculado for zero,
+cai no fallback
+						            ),
+
+						            ROUND(COALESCE(N1.VLRCTE,
+0) / NULLIF(qtdnegnota,
+0) * NULLIF(N1.qtdbase,
+0),
+2)
+						        )
+						END + NVL(N1.FRUVLRFR,
+0) / NULLIF(qtdnegnota,
+0) * NULLIF(N1.qtdbase,
+0) AS CUSTO_FRETE_ROD,
+
+					
+					     0 as custo_frete_aer,
+
+					--SELECT
+							ROUND((CASE
+							    
+WHEN (COALESCE(vlrdevvendasemrefugo,
+0) / 
+							          NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 THEN
+							        0
+							    
+WHEN COALESCE(N1.DB_VLRTOT,
+0) > 0 THEN
+							        N1.DB_VLRTOT * (N1.qtdbase / NULLIF(N1.qtdnegite,
+0)) + 
+							        COALESCE(N1.qtdbase *
+							            (NVL(N1.DVLRNOTA,
+0) / qtdnegnota),
+
+							            0)
+							    ELSE
+							        COALESCE(N1.qtdbase *
+							            (NVL(N1.DVLRNOTA,
+0) / qtdnegnota),
+
+							            0)
+							END),
+2) * PERCENTUAL AS TESTE_DEBIT,
+
+					
+							ROUND((CASE
+							    
+WHEN (COALESCE(vlrdevvendasemrefugo,
+0) / 
+							          NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0 THEN
+							        0
+							    
+WHEN COALESCE(N1.CR_VLRTOT,
+0) > 0 THEN
+							        N1.CR_VLRTOT * (N1.qtdbase / NULLIF(N1.qtdnegite,
+0)) +
+							        COALESCE(N1.qtdbase *
+							            (NVL(N1.CVLRNOTA,
+0) / qtdnegnota),
+
+							            0)
+							    ELSE
+							        COALESCE(N1.qtdbase *
+							            (NVL(N1.CVLRNOTA,
+0) / qtdnegnota),
+
+							            0)
+							END),
+2) * PERCENTUAL AS TESTE_CREDIT,
+
+					
+					     (case
+					       
+WHEN( (COALESCE((vlrdevvendasemrefugo),
+0) /
+					            NULLIF(N1.qtdnegite,
+0)) * N1.qtdbase > 0) 
+OR (N1.PROCESSO LIKE 'REFUGO%') then
+					        0
+					       else
+					        N1.qtdbase * N1.pesoliqpro *
+					        (SELECT
+COALESCE((vlrlanc /
+					                    COALESCE((SELECT
+SUM(i.QTDNEG * p.PESOLIQ)
+					                           
+FROM
+TGFCAB c
+					                          
+INNER JOIN
+TGFITE i
+					                             
+ON c.nunota = i.nunota
+					                            
+AND c.CODCENCUS = N1.CODCENCUSCAB
+					                            
+AND TRUNC(c.dtentsai) BETWEEN
+					                                COALESCE(data_menor + 1,
+
+					                                    to_date('01/01/1990',
+
+					                                            'dd/MM/yyyy')) AND
+					                                data_maior
+					                          
+INNER JOIN
+TGFPRO p
+					                             
+ON p.codprod = i.codprod
+					                          
+inner JOIN
+TGFTOP t
+					                             
+ON (t.CODTIPOPER = c.CODTIPOPER AND
+					                                c.DHTIPOPER = t.DHALTER)
+					                          
+WHERE
+c.STATUSNOTA = 'L'
+					                            
+AND p.USOPROD IN
+					                                ('T', 'R', 'V', 'M')
+					                            
+AND UPPER(N1.GRUPOTOP) IN
+					                                ('VENDAS')
+					                            
+AND c.TIPMOV = 'V'),
+
+					                         null)),
+
+					                    0) vlrunitkg
+					           
+FROM
+(SELECT
+data_menor,
+
+					                        data_maior,
+
+					                        (SELECT
+sum(VLRLANC)
+					                           
+FROM
+tcblan l
+					                          
+where
+l.tiplanc = 'D'
+					                            
+AND l.CODCTACTB IN (
+1103
+)
+					                            
+AND l.CODCENCUS = N1.CODCENCUSCAB
+					                            
+AND TRUNC(l.DTMOV) =
+					                                TRUNC(data_maior)) vlrlanc
+					                   
+FROM
+(SELECT
+MAX(dtmov) AS data_menor
+					                           
+from
+tcblan lan
+					                          
+where
+tiplanc = 'D'
+					                            
+AND LAN.CODCTACTB IN (
+1103
+)
+					                            
+AND LAN.CODCENCUS = N1.CODCENCUSCAB
+					                            
+AND TRUNC(DTMOV) <=
+					                                TRUNC(N1.DTENTSAI)) maior
+					                  CROSS 
+JOIN
+(
+SELECT
+MIN(dtmov) AS data_maior
+					                               
+from
+tcblan lan
+					                              
+where
+tiplanc = 'D'
+					                                
+AND LAN.CODCTACTB IN (
+1103
+)
+					                                
+AND LAN.CODCENCUS =
+					                                    N1.CODCENCUSCAB
+					                                
+AND TRUNC(DTMOV) >=
+					                                    TRUNC(N1.DTENTSAI)
+) menor
+) t
+)
+					     
+end
+) AS SEGURO_CRED,
+					     (
+COALESCE((CASE
+					            
+WHEN N1.MERCADO = 'ME' THEN
+					             (cmplme.cmplmevlrtot)
+					            ELSE
+					             (cmpl.cmplvlrtot)
+					          
+END),
+					          0) / NULLIF(N1.qtdnegite, 0)
+) * N1.qtdbase receita_complementar,
+					     (
+CASE
+					       
+WHEN N1.MERCADO = 'ME' THEN
+					        (cmplme.cmplmenunota)
+					       ELSE
+					        (cmpl.cmplnunota)
+					     
+END
+) nunota_complementar,
+					     0 frete_rural,
+					     OBS1,
+					     OBS2,
+					     LOSS,
+					     STCOM,
+					     CLIREALOC,
+					     ETDR,
+					     ETAR, 
+								ROUND(
+(
+CASE
+								    
+WHEN (
+COALESCE(vlrdevvendasemrefugo, 0) / 
+								          NULLIF(N1.qtdnegite, 0)
+) * N1.qtdbase > 0 THEN
+								        0
+								    
+WHEN COALESCE(N1.DB_VLRTOTMOE, 0) > 0 THEN
+								        N1.DB_VLRTOTMOE * (
+N1.qtdbase / NULLIF(N1.qtdnegite, 0)
+)
+								    ELSE
+								        COALESCE(N1.qtdbase *
+								            (NVL(N1.DVLRMOEDAEX, 0) / qtdnegnota), 
+								            0)
+								END
+), 2
+) * PERCENTUAL AS DEBIT_MOE,
+					 
+								ROUND(
+(
+CASE
+								    
+WHEN (
+COALESCE(vlrdevvendasemrefugo, 0) / 
+								          NULLIF(N1.qtdnegite, 0)
+) * N1.qtdbase > 0 THEN
+								        0
+								    
+WHEN COALESCE(N1.CR_VLRTOTMOE, 0) > 0 THEN
+								        N1.CR_VLRTOTMOE * (
+N1.qtdbase / NULLIF(N1.qtdnegite, 0)
+)
+								    ELSE
+								        COALESCE(N1.qtdbase *
+								            (NVL(N1.CVLRMOEDAEX, 0) / qtdnegnota), 
+								            0)
+								END
+), 2
+) * PERCENTUAL AS CREDIT_MOE,
+					           PERCENTUAL,
+					           OPEN_AMOUNT,
+					           AD_EX_BOOKING BOOKING ,
+							   AD_LINER LINER,
+							   LOC_ENT,
+					           DTENTROM,
+					           VLRCTE,
+					           FRUVLRFR,
+					           DB_VLRTOT,
+		                       CR_VLRTOT,
+		                       DB_VLRTOTMOE,
+		                       CR_VLRTOTMOE,
+		                       AD_PERCSPREADRISCO
+						FROM VW_NOTAS_31 N1 
+						LEFT 
+JOIN
+(
+SELECT
+max(c.nunota) cmplmenunota,
+SUM(i.vlrtot) cmplmevlrtot,
+c.codproj cmplmecodproj,
+i.codprod cmplmecodprod,
+i.controle cmplmecontrole,
+i.qtdneg cmplmeqtdneg,
+i.codlocalorig cmplmecodlocalorig
+							           
+FROM
+TGFCAB c
+							          
+INNER JOIN
+TGFITE i
+							             
+ON i.nunota = c.nunota
+							          
+INNER JOIN
+TGFTOP T
+							             
+ON (
+T.CODTIPOPER = C.CODTIPOPER AND
+							                C.DHTIPOPER = T.DHALTER
+)
+							                
+AND T.AD_CRE_DEB='X'
+							            
+AND t.COMPLEMENTO = 'S'
+							        
+GROUP BY
+c.codproj,
+i.codprod,
+i.controle,
+i.qtdneg,
+i.codlocalorig
+) cmplme 
+							    
+ON cmplme.cmplmecodproj = N1.codproj
+					            
+AND cmplme.cmplmecodprod = N1.codprodite
+					            
+AND cmplme.cmplmecontrole = N1.CONTROLE
+					            
+AND cmplme.cmplmeqtdneg = N1.qtdnegite
+					            
+AND cmplme.cmplmecodlocalorig = N1.CODLOCALORIG
+					     
+LEFT JOIN
+(
+SELECT
+max(c.nunota) cmplnunota,
+SUM(i.vlrtot) cmplvlrtot,
+v.NUNOTAORIG cmplNUNOTAORIG,
+v.SEQUENCIAORIG cmplSEQUENCIAORIG
+					                
+FROM
+TGFCAB c
+					               
+INNER JOIN
+TGFITE i
+					                  
+ON i.nunota = c.nunota
+					               
+INNER JOIN
+TGFTOP T
+					                  
+ON (
+T.CODTIPOPER = C.CODTIPOPER AND
+					                     C.DHTIPOPER = T.DHALTER
+)  
+AND T.AD_CRE_DEB='X'
+					                 
+AND t.COMPLEMENTO = 'S'
+					               
+INNER JOIN
+TGFVAR v
+					                  
+ON v.NUNOTA = c.nunota 
+					                 
+AND v.sequencia = i.sequencia
+					               
+GROUP BY
+v.NUNOTAORIG ,
+v.SEQUENCIAORIG   
+) cmpl 
+					             
+ON cmpl.cmplNUNOTAORIG = N1.nunota
+					            
+AND cmpl.cmplSEQUENCIAORIG = N1.sequencia 
+					     
+LEFT JOIN
+(
+SELECT
+sum(VLRCTE_RATEADO)/  max(vlrtodasnotascte) FR1VLR  ,
+v1.chavenfe FR1chavenfe
+					                 
+FROM
+VW_ARG_FRETES v1 
+GROUP BY
+v1.chavenfe 
+) FR1 
+ON FR1.FR1chavenfe=N1.CHAVENFE
+					     
+LEFT JOIN
+(
+SELECT
+MAX(FR4.FR4VLRCTE) FR4VLRCTE,
+FR4.FR4CODPROJ 
+FROM
+VW_CTE_CODPROJ FR4 
+GROUP BY
+FR4.FR4CODPROJ
+) FR4 
+ON FR4.FR4CODPROJ=N1.CODPROJ 
+AND NVL(FR1.FR1VLR,
+0) = 0
+					     
+LEFT JOIN
+(
+SELECT
+NULLIF(SUM(dp.vlrunit),
+0) FR2vlrunit,
+dp.codproj FR2codproj
+                                     
+FROM
+VW_BMC_FRETE_MARITIMO dp
+                                     
+GROUP BY
+dp.codproj
+) FR2 
+ON FR2.FR2codproj = N1.CODPROJ     
+					     
+LEFT JOIN
+(
+SELECT
+SUM(dp.vlrunit) FR3vlrunit,
+dp.codproj FR3codproj
+                                     
+FROM
+VW_BMC_DESPESAS_PORTUARIAS dp
+                                     
+GROUP BY
+dp.codproj
+) FR3 
+ON FR3.FR3codproj = N1.CODPROJ
+                     
+					                 
+                        
+) N2
+                        
+                        
+) N3

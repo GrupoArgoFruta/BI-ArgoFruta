@@ -1,0 +1,1291 @@
+    WITH DEV_ITEM AS (  SELECT
+        /*+ MATERIALIZE */
+				           V.NUNOTAORIG,
+        
+				           V.SEQUENCIAORIG,
+        
+				           SUM(I.QTDNEG) AS V_QTDDEV,
+        
+				           SUM(I.VLRTOT) AS V_VLRDEV
+				    
+    FROM
+        TGFVAR V
+				
+				    
+    INNER JOIN
+        TGFCAB C
+				        
+            ON C.NUNOTA = V.NUNOTA
+				       
+            AND C.TIPMOV = 'D'
+				       
+            AND C.STATUSNOTA = 'L'
+				
+				    
+    INNER JOIN
+        TGFITE I
+				        
+            ON I.NUNOTA = C.NUNOTA
+				       
+            AND I.SEQUENCIA = V.SEQUENCIA
+				
+				    
+    GROUP BY
+				        V.NUNOTAORIG,
+				        V.SEQUENCIAORIG)
+      ,QTDNEG_POR_NUNOTA AS ( 
+                            SELECT
+    /*+ MATERIALIZE */ ITE.NUNOTA,
+    SUM(NVL(ITE.AD_QTDNEGOR,
+    ITE.QTDNEG)) - sum(NVL(DEV.V_QTDDEV,
+    0)) AS QTDNEGNOTA,
+    SUM(ITE.VLRTOT) - (sum(NVL(DEV.V_QTDDEV,
+    0)) * SUM(ite.VLRUNIT)) VLRTOTNOTA
+                            FROM
+        TGFITE ITE
+                            
+    INNER JOIN
+        TGFCAB CAB 
+            ON ITE.NUNOTA=CAB.NUNOTA 
+            AND CAB.TIPMOV='V' 
+            AND CAB.STATUSNOTA='L'
+                            
+    LEFT JOIN
+        DEV_ITEM DEV
+						        
+            ON DEV.NUNOTAORIG = ITE.NUNOTA
+						        
+            AND DEV.SEQUENCIAORIG = ITE.SEQUENCIA
+						          
+						    
+    WHERE
+        (NVL(ITE.AD_QTDNEGOR,ITE.QTDNEG) - NVL(DEV.V_QTDDEV, 0)) > 0    
+                            
+    GROUP BY
+        ITE.NUNOTA
+                          )  
+	,ITE_LIQ AS (
+	    SELECT
+        /*+ MATERIALIZE */
+	           C3.CODCENCUS,
+        
+	           I3.CODPROD,
+        
+	           I3.AD_CALIBRE,
+        
+	           I3.CONTROLE,
+        
+	           I3.NUNOTA,
+        
+	           I3.SEQUENCIA,
+        
+	           NVL(I3.AD_QTDNEGOR,
+        I3.QTDNEG) - NVL(DEV.V_QTDDEV,
+        0) AS QTD_LIQ
+	    
+    FROM
+        TGFCAB C3
+	    
+    JOIN
+        TGFITE I3
+	           
+            ON I3.NUNOTA = C3.NUNOTA
+	    
+    LEFT JOIN
+        DEV_ITEM DEV
+	           
+            ON DEV.NUNOTAORIG    = C3.NUNOTA
+	          
+            AND DEV.SEQUENCIAORIG = I3.SEQUENCIA
+	    
+    WHERE
+        C3.TIPMOV     = 'V'
+	      
+        AND  C3.STATUSNOTA = 'L'
+	      
+        AND (NVL(I3.AD_QTDNEGOR, I3.QTDNEG) - NVL(DEV.V_QTDDEV, 0)) > 0
+	)
+	,QTDNEG_POR_FORN AS (
+	    SELECT
+        /*+ MATERIALIZE */
+	           I3.CODPARC,
+        
+	           I3.NUNOTA,
+        
+	           SUM(((I3.QUANTITY) - NVL(DEV.V_QTDDEV,
+        0))) AS QTDNEGFOR
+	    
+    FROM
+        TGFCAB C3
+	    
+    JOIN
+        AD_TGFITECOMPL I3
+	           
+            ON I3.NUNOTA = C3.NUNOTA
+	    
+    LEFT JOIN
+        VW_BMC_GET_QTD_DEV_VENDA_FOR DEV
+	           
+            ON DEV.NUNOTAORIG    = C3.NUNOTA
+	          
+            AND DEV.CODPARC = I3.CODPARC
+	    
+    WHERE
+        C3.TIPMOV     = 'V'
+	      
+        AND  C3.STATUSNOTA = 'L'
+	    
+    GROUP BY
+        I3.CODPARC,
+        I3.NUNOTA
+	    
+    HAVING
+        SUM((I3.QUANTITY) - NVL(DEV.V_QTDDEV, 0)) >0
+	)	
+	, QTDNEG_POR_CENCUS AS (
+	    SELECT
+        /*+ MATERIALIZE */ CODCENCUS,
+        SUM(QTD_LIQ) AS QTDNEGCENCUS
+	    
+    FROM
+        ITE_LIQ
+	    
+    GROUP BY
+        CODCENCUS
+	)
+	, QTDNEG_POR_CALIBRE AS (
+	    SELECT
+        /*+ MATERIALIZE */ AD_CALIBRE,
+        NUNOTA,
+        CODPROD,
+        SUM(QTD_LIQ) AS QTDNEGCALIBRE
+	    
+    FROM
+        ITE_LIQ
+	    
+    GROUP BY
+        AD_CALIBRE,
+        NUNOTA,
+        CODPROD,
+        CODPROD
+	)
+	, QTDNEG_POR_CONTROLE AS (
+	    SELECT
+        /*+ MATERIALIZE */ CONTROLE,
+        NUNOTA,
+        CODPROD,
+        SUM(QTD_LIQ) AS QTDNEGCONTROLE
+	    
+    FROM
+        ITE_LIQ
+	    
+    GROUP BY
+        CONTROLE,
+        NUNOTA,
+        CODPROD
+	)                    
+   , VLRPROVFORN_POR_CENCUS AS (
+                                   SELECT
+        /*+ MATERIALIZE */ V.CODCENCUS,
+        SUM(V.VLRREF) VLRPROVFORN
+                                    
+    FROM
+        VW_BMC_BI_PROV_FORNECEDORES V
+                                   
+    GROUP BY
+        V.CODCENCUS
+                               )	
+   , PARC_PATENTE  AS          (
+                                 SELECT
+        /*+ MATERIALIZE */ DISTINCT PAT.CODPARC CODPARCPATENTE,
+        PAT.DTVIGENCIAINICIO,
+        PAT.DTVIGENCIAFIM,
+        PAT.CODGRUPOPROD
+                                 
+    FROM
+        AD_TGFGRUPATENTES PAT
+
+                                 ) 
+   , VARIEDADE_MP  AS           (
+                                  SELECT
+        /*+ MATERIALIZE */ DISTINCT GRUMP3.CODGRUPOPROD CODVARIEDADEMP,
+        GRUMP3.DESCRGRUPOPROD VARIEDADEMP,
+        AR.NROUNICO
+                                  
+    FROM
+        AD_ROMANEIOENTR AR   
+                                  
+    INNER JOIN
+        TGFPRO PRO 
+            ON AR.CODPROD = PRO.CODPROD 
+                                  
+    INNER JOIN
+        TGFGRU GRUMP3 
+            ON PRO.CODGRUPOPROD=GRUMP3.CODGRUPOPROD 
+
+                                 ) 
+  ,
+    NF_ENT_MP AS                  (
+                                  SELECT
+        /*+ MATERIALIZE */ LISTAGG(DISTINCT CAB4.NUMNOTA,
+        ',') NFENTRADAMP,
+        MAX(CAB4.DTNEG) DTENTRADAMP,
+        FAT.NROUNICO
+                                     
+    FROM
+        AD_ROMANEIOENTFAT FAT
+                                    
+    INNER JOIN
+        TGFCAB CAB3
+                                       
+            ON CAB3.NUNOTA = FAT.NUNOTA
+                                    
+    INNER JOIN
+        TGFVAR V
+                                      
+            ON CAB3.NUNOTA = V.NUNOTAORIG
+                                    
+    INNER JOIN
+        TGFCAB CAB4 
+                                      
+            ON CAB4.NUNOTA = V.NUNOTA
+                                  
+    GROUP BY
+        FAT.NROUNICO    
+                                   ) 
+  ,
+    PED_FRETE_VENDAS AS        (
+									SELECT /*+ MATERIALIZE */ CODPROJ,
+    
+									       SUM(VLRTOT) VLRTOT
+									       
+									FROM VW_TGFCAB_ITE VTI 
+									WHERE VTI.TIPMOV='O' 
+    AND VTI.CODTIPOPER<>2102
+									  
+    AND VTI.DESCRNAT LIKE '%FRETE%'
+									  
+    AND VTI.CODPROJ BETWEEN 4000000000 AND 5000000000
+									  
+    AND PENDENTE='S'
+									  
+    AND STATUSNOTA='L'
+									  
+    AND DTNEG>= DATE '2025-12-18'
+									GROUP 
+BY
+    CODPROJ     
+                                   ) 
+   ,
+    PED_DESP_LOG AS        (
+									SELECT /*+ MATERIALIZE */ CODPROJ,
+    
+									       SUM(VLRTOT) VLRTOT
+									       
+									FROM VW_TGFCAB_ITE VTI 
+									WHERE VTI.TIPMOV='O' 
+    AND VTI.CODTIPOPER<>2102
+									  
+    AND VTI.CODNAT IN (203024)
+									  
+    AND VTI.CODPROJ BETWEEN 4000000000 AND 5000000000
+									  
+    AND PENDENTE='S'
+									  
+    AND STATUSNOTA='L'
+									  
+    AND DTNEG>= DATE '2026-06-01'
+									GROUP 
+BY
+    CODPROJ     
+                                   )                                  
+,
+    ITE_BASE AS (
+    SELECT
+        /*+ MATERIALIZE */
+           ITE.*,
+        
+           CASE 
+            WHEN REGEXP_LIKE(ITE.ROMANEIO,
+            '^[0-9]+$') 
+                THEN TO_NUMBER(ITE.ROMANEIO) 
+        END AS ROMANEIO_NUM
+      
+    FROM
+        AD_TGFITECOMPL ITE
+) ,
+    TIPO_PARCERIA_LKP AS (
+    SELECT
+        /*+ MATERIALIZE */
+           CODTIPOPARCERIA,
+        
+           F_DESCROPC(
+               'TGFPAR',
+        
+               'AD_TIPOPARCERIA',
+        
+               CODTIPOPARCERIA
+           ) AS TIPOPARCERIA
+    
+    FROM
+        (
+        SELECT
+            DISTINCT
+               AD_TIPOPARCERIA AS CODTIPOPARCERIA
+        
+        FROM
+            TGFPAR
+        
+        WHERE
+            AD_TIPOPARCERIA IS NOT NULL
+    )
+)                                  
+
+SELECT /* DISTINCT */1 CODREGRA,
+        
+		'1 - REGRA GERAL' REGRA,
+        
+		COALESCE(NULLIF(GRU.AD_ROYALTS,
+        'N'),
+        'N') AS ROYALT,
+        
+		1 + TRUNC( (TRUNC(COALESCE(CAB.AD_DTENTSAIC,
+        CAB.DTENTSAI)) - TRUNC(TRUNC(COALESCE(CAB.AD_DTENTSAIC,
+        CAB.DTENTSAI),
+        'YYYY'),
+        'IW')) / 7 ) SEMANA,
+        
+	    CAB.CODEMP,
+        
+        CAB.CIF_FOB,
+        
+        PAI.AD_MERCADO AD_MERCADOPAI,
+        
+        CAB.QTDVOL QTDVOLCAB,
+        
+        CAB.AD_EX_DTPREVEMB ETD,
+        
+        CAB.AD_EX_DTPREVDES ETA,
+        
+        CAB.AD_EX_CONTAINER,
+        
+        PAI.DESCRICAO AS PAIS,
+        
+        PAI.CODPAIS,
+        
+		NAV.AD_NAVIO AS VESSEL,
+        
+        PO1.NOMPORTO PORTO_ORIGEM,
+        
+        PO2.NOMPORTO PORTO_DESTINO,
+        
+        TOP.AD_MODAL,
+        
+        GRU.AD_USAPROVISAO AS PRV,
+        
+		ITE.VLRTOT - (NVL(DEV.V_QTDDEV,
+        0) * ITE.VLRUNIT) VLR_TOTAL_CX_LIQUIDA_SP,
+        
+		(ITE.VLRTOT/(nvl(AD_PERCSPREADRISCO,
+        0)/100+1)) - (NVL(DEV.V_QTDDEV,
+        0) * (ITE.VLRUNIT/(nvl(AD_PERCSPREADRISCO,
+        0)/100+1))) VLR_TOTAL_CX_LIQUIDA,
+        
+		TO_CHAR(CAB.DTNEG,
+        'YYYY') ANO,
+        
+		CASE 
+			 
+        WHEN NAT.DESCRNAT LIKE '%REFUG%' 
+        AND ITE.REFERENCE_NO = '<SEM PROJETO>' 
+        AND ITE.CONTROLE LIKE '____-____%' 
+		     THEN 'REFUGO PA' 
+		     
+        WHEN NAT.DESCRNAT LIKE '%REFUG%' 
+        AND ITE.REFERENCE_NO = '<SEM PROJETO>' 
+        AND ITE.CONTROLE NOT LIKE '____-____%' 
+		     THEN 'REFUGO MP'  
+   		     
+        WHEN NAT.DESCRNAT LIKE '%TRANSF%' 
+        AND ITE.REFERENCE_NO = '<SEM PROJETO>'  
+		     THEN '0-TRANSFERENCIAS ENTRE FILIAIS'  
+		     
+        ELSE ITE.REFERENCE_NO 
+		END PROCESSO,
+        					        
+        CASE 
+            WHEN NAT.DESCRNAT LIKE '%REFUG%' 
+            AND ITE.REFERENCE_NO = '<SEM PROJETO>' 
+            AND ITE.CONTROLE NOT LIKE '____-____%'  THEN 0 
+            ELSE ITE.QUANTITY 
+        END QTDPALLET ,
+        
+		ITE.TRACEABILITY LOTEARGO,
+        
+		ITE.ROMANEIO LOTEMP,
+        
+		ITE.CODPARC CODPRODUTOR,
+        
+		ITE.PRODUCER NOMEPRODUTOR,
+        
+		ITE.NROUNICOPLT NROPALLET,
+        
+		CASE 
+        WHEN CAB.AD_CLIREALOC IS NOT NULL 
+        AND CAB.AD_CLIREALOC<>CAB.CODPARC THEN '(R)'||PARCLI.NOMEPARC 
+        ELSE PARCLI.NOMEPARC 
+    END NOME_CLIENTE,
+    
+        PRO.PESOLIQ TIPO_CX,
+    
+        CAB.DTNEG DATA,
+    
+        TO_CHAR(CAB.DTENTSAI,
+    'MON') MES,
+    
+		GRU.CODGRUPOPROD CODVARIEDADE,
+    
+		GRU.DESCRGRUPOPROD AS VARIEDADE,
+    
+        CAB.NUNOTA,
+    
+        CAB.NUMNOTA NF,
+    
+        ITE.PRODUCTCODE CODPRODITE,
+    
+        ITE.SEQITE SEQUENCIA,
+    
+        MOE.NOMEMOEDA MOEDA,
+    
+	    CAB.VLRMOEDA VLR_COTACAO,
+    
+	    CASE 
+        WHEN UFS.CODPAIS = 55 
+        AND  CAB.AD_EX_DTPREVEMB IS NULL 
+        AND CAB.CIF_FOB='C' 
+        AND CAB.TIPFRETE='S' THEN 'CIF' 
+        WHEN UFS.CODPAIS = 55 
+        AND  CAB.AD_EX_DTPREVEMB IS NULL 
+        AND CAB.CIF_FOB='F' THEN 'FOB'  
+        ELSE CAB.AD_INCOTERM 
+    END INCONTERMS,
+    
+	    ITE.PRODUCTCODE CODPROD,
+    
+		ITE.PRODUCT DESCRPROD,
+    
+		CAST(NULL AS NUMBER) NUNOTAMP,
+    
+		ITE.QUANTITY - NVL(DEV.V_QTDDEV,
+    0) QTDMP,
+    
+		ITE.QUANTITY - NVL(DEV.V_QTDDEV,
+    0) QTDNEG,
+    
+		ITE.QUANTITY - NVL(DEV.V_QTDDEV,
+    0) QTDNEGITE,
+    
+		ITE.CALIBER CALIBREMP,
+    
+		CASE 
+    WHEN PAI.AD_MERCADO='BRASIL' THEN  'MI' 
+    ELSE 'ME' 
+END MERCPRODMP,
+
+        CEN.DESCRCENCUS,
+
+        (ITE.VLRUNIT/(nvl(AD_PERCSPREADRISCO,
+0)/100+1)) / NULLIF(PRO.PESOLIQ,
+0) VLR_KG,
+
+		(COALESCE(ITEO.VLRDESC,
+0) * (ITE.QUANTITY /NULLIF(CASE 
+    WHEN nvl(ITEO.AD_QTDNEGOR,
+    0)>0 THEN ITEO.AD_QTDNEGOR 
+    ELSE ITEO.QTDNEG 
+end,
+0))) + (COALESCE(DFIN.DESCPROP,
+0)/* (ITE.QUANTITY /ITEO.QTDNEG)*/) VLR_DESC_COM,
+
+		COM.VLRCOM VLR_COM_VENDA,
+
+	    (CASE
+            
+WHEN NVL(DEV.V_QTDDEV,
+0) > 0 
+            THEN ITE.QUANTITY *
+                 (1 - (NVL(DEV.V_QTDDEV,
+0) 
+                 / NULLIF(ITE.QUANTITY,
+0)))
+            
+ELSE ITE.QUANTITY
+          
+END) QTDBASE,
+
+		0 vlr_claim,
+
+        (CASE 
+WHEN nvl(ITEO.AD_QTDNEGOR,
+0)>0 THEN ITEO.AD_QTDNEGOR 
+ELSE ITEO.QTDNEG 
+end - ITEO.QTDENTREGUE) VLR_OUTRAS_DEV,
+
+        (ITE.VLRUNIT/(nvl(AD_PERCSPREADRISCO,
+0)/100+1)) VLR_PRECO_VENDA,
+
+        0 VLR_PROV_DESC,
+
+        NVL(DEV.V_QTDDEV,
+0) QTDDEVVENDA,
+
+        CASE 
+WHEN NVL(DEV.REFUGO,
+'N')='S' THEN NVL(DEV.V_VLRDEV,
+0) 
+ELSE 0 
+END VLRDEVVENDASEMREFUGO,
+
+        NAT.DESCRNAT AS NATUREZA,
+
+        CAB.CODNAT AS CODNATUREZA,
+
+        COALESCE(CEN.AD_AGRUPADORBI,
+'N/D') AS CENTRO_RESULTADO,
+
+        CEN.CODCENCUS AS CODCENTRO,
+
+        PARCLI.CODPARC,
+
+        COALESCE(TOP.AD_AGRUPADORBI,
+'OUTROS') OPERACAO,
+
+        CAB.VLRNOTA,
+
+	    ITE.CONTROLE CONTROLE,
+
+        CAB.CODTIPOPER,
+
+        CAB.VLRFRETE,
+
+        CAB.TIPMOV,
+
+	    ITE.PRODUCTCODE CODPRODPAMP,
+
+		ITE.CODPRODMP CODPRODMP,
+
+		ITE.CODPROJ,
+
+		CAB.CHAVENFE,
+
+        CAB.DTENTSAI,
+
+        TOP.GRUPO GRUPOTOP,
+
+        PRO.PESOLIQ PESOLIQPRO,
+
+        CAB.CODCENCUS CODCENCUSCAB,
+
+        ITEO.CODLOCALORIG,
+
+        PRO.CODGRUPOPROD,
+
+        PRO.AD_CULTIVAR,
+
+        COALESCE(PARCLI.DESCFIN,
+0) PERCDESCCONTRATUAL,
+
+        0 DESCONTO_COMERCIAL_MP,
+
+        COALESCE(QNOTA.QTDNEGNOTA,
+0) QTDNEGNOTA,
+
+        COALESCE(QNOTA.VLRTOTNOTA,
+0) VLRTOTNOTA,
+
+        COALESCE(QCEN.QTDNEGCENCUS,
+0) QTDNEGCENCUS,
+
+        COALESCE(QPRV.VLRPROVFORN,
+0) VLRPROVFORN,
+
+        CASE
+         
+WHEN UFS.CODPAIS = 55 
+AND  CAB.AD_EX_DTPREVEMB IS NULL 
+         THEN 'MI'
+         
+ELSE 'ME'
+        
+END AS MERCADO,
+
+		MPE.VLRUNIT* (ITE.QUANTITY- NVL(DEV.V_QTDDEV,
+0)) CUSTO_MP_CALC,
+
+        FRU.NOME FRUTA,
+
+        FRU.CODFRUTA,
+
+        QPAT.CODPARCPATENTE,
+
+        QVAR.CODVARIEDADEMP,
+
+        QVAR.VARIEDADEMP,
+
+		ITE.CODPRODCX CODPRODCX,
+
+		PROMPCX.DESCRPROD DESCRPRODCX,
+
+	    CASE 
+	        
+WHEN REGEXP_LIKE(ITE.ROMANEIO,
+'^[0-9]+$') THEN TO_NUMBER(ITE.ROMANEIO) 
+	        
+ELSE NULL 
+	    
+END AS  ROMANEIO,
+
+        QNFMP.NFENTRADAMP,
+
+        QNFMP.DTENTRADAMP,
+
+        CAB.AD_EX_OBS1 OBS1,
+
+        CAB.AD_EX_OBS2 OBS2,
+
+        CAB.AD_EX_OBS3 LOSS,
+
+        CAB.AD_STATUSCOM STCOM,
+
+        CASE 
+WHEN CAB.AD_CLIREALOC IS NOT NULL THEN CAB.CODPARC 
+ELSE NULL 
+END CLIREALOC,
+
+        CAB.AD_EX_DTPREVEMBR ETDR,
+
+        CAB.AD_EX_DTPREVDESR ETAR,
+
+        ITEO.AD_PERCVLRTOT,
+
+        (ITE.QUANTITY * ITE.VLRUNIT)/nullif(QNOTA.VLRTOTNOTA,
+0) PERCVLRTOTCPL,
+
+        CAB.VLRNOTA*((( ITE.QUANTITY) * ITE.VLRUNIT)/NULLIF(QNOTA.VLRTOTNOTA,
+0)) VLRNFROPP,
+
+        NVL(PER_NF.PERCENTUAL,
+1) PERCENTUAL,
+
+		OPN.OPEN_AMOUNT,
+
+	    CRDB.CVLRMOEDAEX,
+
+	    CRDB.DVLRMOEDAEX,
+
+	    CRDB.CVLRNOTA,
+
+	    CRDB.DVLRNOTA,
+
+	    CAB.AD_EX_BOOKING,
+
+	    CAB.AD_LINER,
+
+		ROM1.CODLOCAL AS LOC_ENT,
+
+		(ITE.VLRUNIT * (ITE.QUANTITY- NVL(DEV.V_QTDDEV,
+0))) BR,
+
+		ITE.DTENTROM,
+
+		TPL.TIPOPARCERIA TIPOPARCERIA,
+
+		NVL(PED_FR.VLRTOT,
+0) PED_FR,
+
+		CAB.AD_INCOTERM,
+
+		CASE 
+WHEN FRU.NOME LIKE 'UVA%' 
+OR FRU.NOME LIKE 'MANG%' THEN 3767 
+ELSE NVL(CAB.AD_CODCIDCOL,
+3767) 
+END AD_CODCIDCOL,
+
+		CIDCO.NOMECID AS CIDCOL,
+
+		CASE 
+WHEN PO1.IDPORTO IS NULL THEN PARCLI.CODCID 
+ELSE PO1.CODCID 
+END CODCIDFIMCTE,
+
+		CIDDE.NOMECID AS CIDDES,
+
+		CASE 
+WHEN CAB.CODPROJ IN (0,
+4110260175) 
+		AND CASE 
+			 
+WHEN NAT.DESCRNAT LIKE '%REFUG%' 
+AND ITE.REFERENCE_NO = '<SEM PROJETO>' 
+AND ITE.CONTROLE LIKE '____-____%' 
+		     THEN 'REFUGO PA' 
+		     
+WHEN NAT.DESCRNAT LIKE '%REFUG%' 
+AND ITE.REFERENCE_NO = '<SEM PROJETO>' 
+AND ITE.CONTROLE NOT LIKE '____-____%' 
+		     THEN 'REFUGO MP'  
+   		     
+WHEN NAT.DESCRNAT LIKE '%TRANSF%' 
+AND ITE.REFERENCE_NO = '<SEM PROJETO>'  
+		     THEN '0-TRANSFERENCIAS ENTRE FILIAIS'  
+		     
+ELSE ITE.REFERENCE_NO 
+		    
+END LIKE '%._' THEN 0 
+ELSE FHST.VLRCTE 
+END VLRCTE ,
+
+		FMAHST.VLRTOT VLRFRMA,
+
+		TO_CHAR((ITE.DTENTROM),
+'IW-YYYY') DT1,
+
+		TO_CHAR((ROM1.DTENTRADA ),
+'IW-YYYY') DT2,
+
+		MSEM.CUSTOMEDIO,
+
+		(FRRU.VLRNOTA) AS FRUVLRFR,
+
+		ITE.QUANTITY,
+
+		((NVL(CD_ITE.DB_VLRTOT,
+0)/QCTR.QTDNEGCONTROLE )* ITE.QUANTITY)+NVL(((CD_ITE2.DB_VLRTOT1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  DB_VLRTOT,
+
+		((NVL(CD_ITE.CR_VLRTOT,
+0)/QCTR.QTDNEGCONTROLE )* ITE.QUANTITY)+NVL(((CD_ITE2.CR_VLRTOT1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  CR_VLRTOT,
+
+    	((NVL(CD_ITE.DB_VLRTOTMOE,
+0)/QCTR.QTDNEGCONTROLE )* ITE.QUANTITY)+NVL(((CD_ITE2.DB_VLRTOTMOE1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  DB_VLRTOTMOE,
+
+		((NVL(CD_ITE.CR_VLRTOTMOE,
+0)/QCTR.QTDNEGCONTROLE )* ITE.QUANTITY)+NVL(((CD_ITE2.CR_VLRTOTMOE1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  CR_VLRTOTMOE,
+
+		 NVL(ITEO.AD_QTDNEGOR,
+ITEO.QTDNEG) qtd1,
+
+		 ITE.QUANTITY qtd2,
+
+		 NVL(CD_ITE.CR_VLRTOT,
+0) cr2,
+
+		 QCAL.QTDNEGCALIBRE,
+
+		 NVL(((CD_ITE2.DB_VLRTOT1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  DB_VLRTOT1,
+
+		 NVL(((CD_ITE2.CR_VLRTOT1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  CR_VLRTOT1,
+
+ 		 NVL(((CD_ITE2.DB_VLRTOTMOE1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  DB_VLRTOTMOE1,
+
+		 NVL(((CD_ITE2.CR_VLRTOTMOE1/ QCAL.QTDNEGCALIBRE)* ITE.QUANTITY ),
+0)  CR_VLRTOTMOE1,
+
+		 QFOR.QTDNEGFOR,
+
+		 NVL(((CD_ITE2.DB_VLRTOT1/ QFOR.QTDNEGFOR)* ITE.QUANTITY ),
+0)  DB_VLRTOT2,
+
+		 NVL(((CD_ITE2.CR_VLRTOT1/ QFOR.QTDNEGFOR)* ITE.QUANTITY ),
+0)  CR_VLRTOT2,
+
+ 		 NVL(((CD_ITE2.DB_VLRTOTMOE1/ QFOR.QTDNEGFOR)* ITE.QUANTITY ),
+0)  DB_VLRTOTMOE2,
+
+		 NVL(((CD_ITE2.CR_VLRTOTMOE1/ QFOR.QTDNEGFOR)* ITE.QUANTITY ),
+0)  CR_VLRTOTMOE2,
+
+		 NVL(PED_LOG.VLRTOT,
+0) PED_LOG,
+
+		 AD_PERCSPREADRISCO,
+
+		ITE.VLRTOT - (NVL(DEV.V_QTDDEV,
+0) * ITE.VLRUNIT) -
+		((ITE.VLRTOT/(nvl(AD_PERCSPREADRISCO,
+0)/100+1)) - (NVL(DEV.V_QTDDEV,
+0) * (ITE.VLRUNIT/(nvl(AD_PERCSPREADRISCO,
+0)/100+1)))) DIF_SPREAD ,
+
+		round(((ITE.VLRTOT - (NVL(DEV.V_QTDDEV,
+0) * ITE.VLRUNIT)) * (PARCLI.DESCFIN/100)),
+4) VLR_DESC_FIN_SDEV,
+
+		NVL(DEV.V_QTDDEV,
+0) QTDDEV
+FROM TGFCAB CAB
+INNER 
+JOIN
+ITE_BASE ITE 
+	  
+ON CAB.NUNOTA = ITE.NUNOTA  
+AND cab.CODPARC NOT IN  (
+10049,
+15839) 
+	  
+AND (CAB.CHAVENFE IS NOT NULL)
+INNER 
+JOIN
+TGFITE ITEO
+      
+ON ITEO.NUNOTA=CAB.NUNOTA 
+      
+AND ITEO.SEQUENCIA = ITE.SEQITE 
+INNER 
+JOIN
+TGFPRO PRO
+      
+ON PRO.CODPROD = ITE.PRODUCTCODE 
+INNER 
+JOIN
+TGFGRU GRU
+      
+ON GRU.CODGRUPOPROD = PRO.CODGRUPOPROD
+INNER 
+JOIN
+TGFPAR PARCLI
+      
+ON PARCLI.CODPARC = NVL(CAB.AD_CLIREALOC,
+CAB.CODPARC)
+INNER 
+JOIN
+TGFPAR PARPROD
+      
+ON ITE.CODPARC = PARPROD.CODPARC      
+INNER 
+JOIN
+TSICID CID
+      
+ON CID.CODCID = PARCLI.CODCID
+INNER 
+JOIN
+TSIUFS UFS
+      
+ON UFS.CODUF = CID.UF
+INNER 
+JOIN
+TSIPAI PAI
+      
+ON PAI.CODPAIS = UFS.CODPAIS  
+INNER 
+JOIN
+TGFTOP TOP
+      
+ON (
+TOP.CODTIPOPER = CAB.CODTIPOPER AND
+      CAB.DHTIPOPER = TOP.DHALTER
+)
+      
+AND COALESCE(TOP.AD_CRE_DEB,
+'X') ='X'
+      
+AND UPPER(TOP.GRUPO) = 'VENDAS'
+INNER 
+JOIN
+TGFNAT NAT
+      
+ON NAT.CODNAT = CAB.CODNAT
+INNER 
+JOIN
+TSICUS CEN
+      
+ON CEN.CODCENCUS = CAB.CODCENCUS
+LEFT 
+JOIN
+AD_FRUTA FRU
+      
+ON FRU.CODFRUTA = CEN.AD_CODFRUTA
+LEFT 
+JOIN
+TCSPRJ PRJ
+      
+ON PRJ.CODPROJ = CAB.CODPROJ
+LEFT 
+JOIN
+TCSPRJ PRJ2
+      
+ON PRJ2.CODPROJ = ITE.CODPROJ  
+LEFT 
+JOIN
+TSIMOE MOE
+      
+ON MOE.CODMOEDA = CAB.CODMOEDA
+LEFT 
+JOIN
+TGFCOM COM
+      
+ON COM.NUNOTAORIG = CAB.NUNOTA
+      
+AND COM.SEQUENCIA = ITE.SEQUENCIA  
+LEFT 
+JOIN
+TGFVEI NAV
+      
+ON (
+NAV.CODVEICULO = CAB.AD_EX_NAVIO
+)
+LEFT 
+JOIN
+AD_PORTO PO1
+      
+ON (
+PO1.IDPORTO = CAB.AD_EX_PORTOEMBARQUE
+)
+LEFT 
+JOIN
+AD_PORTO PO2
+      
+ON (
+PO2.IDPORTO = CAB.AD_EX_PORTODESCARGA
+)   
+LEFT 
+JOIN
+VW_BMC_GET_QTD_DEV_VENDA_ROM DEV 
+      
+ON  DEV.nunotaorig=CAB.NUNOTA 
+      
+AND DEV.sequenciaorig=ITE.SEQITE
+      
+AND DEV.ROMANEIO=ITE.ROMANEIO
+LEFT 
+JOIN
+DEV_ITEM DEVO 
+      
+ON  DEVO.nunotaorig=CAB.NUNOTA 
+      
+AND DEVO.sequenciaorig=ITEO.SEQUENCIA 
+LEFT 
+JOIN
+QTDNEG_POR_NUNOTA QNOTA 
+ON QNOTA.NUNOTA = CAB.NUNOTA  
+LEFT 
+JOIN
+QTDNEG_POR_CENCUS QCEN 
+ON QCEN.CODCENCUS = CAB.CODCENCUS  
+LEFT 
+JOIN
+QTDNEG_POR_CALIBRE QCAL 
+ON QCAL.NUNOTA=ITE.NUNOTA 
+AND QCAL.AD_CALIBRE=ITE.CODCALIBRE 
+AND QCAL.CODPROD=ITE.PRODUCTCODE
+LEFT 
+JOIN
+QTDNEG_POR_CONTROLE QCTR 
+ON QCTR.NUNOTA=ITE.NUNOTA 
+AND QCTR.CONTROLE=ITE.CONTROLE 
+AND QCTR.CODPROD=ITE.PRODUCTCODE
+LEFT 
+JOIN
+QTDNEG_POR_FORN QFOR 
+ON QFOR.NUNOTA=ITE.NUNOTA 
+AND QFOR.CODPARC=ITE.CODPARC
+LEFT 
+JOIN
+VLRPROVFORN_POR_CENCUS QPRV 
+ON QPRV.CODCENCUS = CAB.CODCENCUS  
+LEFT 
+JOIN
+PARC_PATENTE QPAT 
+ON QPAT.CODGRUPOPROD = GRU.CODGRUPOPROD
+                           
+AND CAB.DTNEG >= QPAT.DTVIGENCIAINICIO 
+AND CAB.DTNEG < QPAT.DTVIGENCIAFIM + 1
+LEFT 
+JOIN
+VARIEDADE_MP QVAR 
+ON QVAR.NROUNICO = ITE.ROMANEIO_NUM
+LEFT 
+JOIN
+NF_ENT_MP QNFMP 
+ON QNFMP.NROUNICO =  ITE.ROMANEIO_NUM
+LEFT 
+JOIN
+AD_ROMANEIOENTR ROM1 
+ON ROM1.NROUNICO= ITE.ROMANEIO_NUM
+LEFT 
+JOIN
+VW_PERCPROC_NF_V4 PER_NF 
+ON CAB.NUNOTA=PER_NF.NUNOTA 
+AND COALESCE(prj2.codproj,
+prj.codproj)=PER_NF.PROCESSO 
+LEFT 
+JOIN
+MV_AD_REC_COMD_NUNOTA OPN  
+ON OPN.NUNOTA = CAB.NUNOTA -- 
+LEFT JOIN
+VW_AD_REC_COMD OPN 
+ON OPN.NUNOTA=CAB.NUNOTA  
+LEFT 
+JOIN
+(
+SELECT
+SUM(CVLRMOEDAEX) CVLRMOEDAEX,
+SUM(DVLRMOEDAEX) DVLRMOEDAEX,
+SUM(CVLRNOTA) CVLRNOTA,
+SUM(DVLRNOTA) DVLRNOTA,
+CODPROJ CODPROJETO 
+		   FROM
+			(SELECT
+CASE 
+WHEN DC.AD_CRE_DEB ='C' THEN (DC.VLRMOEDAEX) 
+ELSE 0 
+END CVLRMOEDAEX,
+
+				  CASE 
+WHEN DC.AD_CRE_DEB ='D' THEN (DC.VLRMOEDAEX) 
+ELSE 0 
+END DVLRMOEDAEX,
+
+				  CASE 
+WHEN DC.AD_CRE_DEB ='C' THEN (DC.VLRNOTA) 
+ELSE 0 
+END CVLRNOTA,
+
+				  CASE 
+WHEN DC.AD_CRE_DEB ='D' THEN (DC.VLRNOTA) 
+ELSE 0 
+END DVLRNOTA,
+
+				  DC.CODPROJ
+			FROM VW_ARG_CRE_DEB DC
+			WHERE CODPROJ<>0 
+AND AD_CONSCTRL='N')  CREDEB1 
+		    --
+WHERE
+CODPROJ='4150240110'
+			GROUP 
+BY
+CODPROJ) CRDB 
+ON CRDB.CODPROJETO= COALESCE(PRJ2.CODPROJ,
+PRJ.CODPROJ)
+LEFT 
+JOIN
+TGFPRO PROMPCX
+  
+ON PROMPCX.CODPROD = ITE.CODPRODCX	
+LEFT 
+JOIN
+VW_DESCFIN DFIN 
+  
+ON DFIN.NUNOTA=ITEO.NUNOTA 
+  
+AND DFIN.SEQITE=ITEO.SEQUENCIA 
+  
+AND DFIN.QUANTITY=COALESCE(ITE.QUANTITY,
+0)
+  
+AND DFIN.TRACEABILITY=ITE.TRACEABILITY  
+LEFT 
+JOIN
+PED_FRETE_VENDAS  PED_FR 
+ON PED_FR.CODPROJ=ITE.CODPROJ  
+LEFT 
+JOIN
+PED_DESP_LOG PED_LOG 
+ON PED_LOG.CODPROJ=ITE.CODPROJ  
+LEFT 
+JOIN
+TSICID CIDCO
+      
+ON CIDCO.CODCID = CASE 
+WHEN FRU.NOME LIKE 'UVA%' 
+OR FRU.NOME LIKE 'MANG%' THEN 3767 
+ELSE NVL(CAB.AD_CODCIDCOL,
+3767) END
+LEFT 
+JOIN
+TSICID CIDDE
+      
+ON CIDDE.CODCID = CASE 
+    WHEN PO1.IDPORTO IS NULL THEN PARCLI.CODCID 
+    ELSE PO1.CODCID 
+END   
+LEFT 
+JOIN
+(
+SELECT
+    MAX(FHST.VLRCTE) VLRCTE,
+    FHST.CODCIDINICTE,
+    FHST.CODCIDFIMCTE,
+    FHST.CIF_FOB 
+FROM
+    TB_FRETES_HST FHST 
+GROUP BY
+    FHST.CODCIDINICTE,
+    FHST.CODCIDFIMCTE,
+    FHST.CIF_FOB
+) FHST 
+  
+ON FHST.CODCIDINICTE = CASE 
+       
+    WHEN CAB.CODTIPOPER = 1161 THEN NULL 
+       
+    ELSE CASE 
+        WHEN FRU.NOME LIKE 'UVA%' 
+        OR FRU.NOME LIKE 'MANG%' 
+            THEN 3767 
+        ELSE NVL(CAB.AD_CODCIDCOL,
+    3767) 
+END 
+     
+END --
+AND CAB.CODPROJ<>0
+  
+AND FHST.CODCIDFIMCTE = CASE 
+WHEN PO1.IDPORTO IS NULL THEN PARCLI.CODCID 
+ELSE PO1.CODCID END
+  
+AND FHST.CIF_FOB = CAB.CIF_FOB
+LEFT 
+JOIN
+(
+    SELECT
+        MAX(FMAHST.VLRTOT) VLRTOT,
+        FMAHST.AD_EX_PORTOEMBARQUE,
+        FMAHST.AD_EX_PORTODESCARGA 
+    FROM
+        TB_FRETES_MARITIMO_HST FMAHST 
+    GROUP BY
+        FMAHST.AD_EX_PORTOEMBARQUE,
+        FMAHST.AD_EX_PORTODESCARGA
+) FMAHST 
+    ON FMAHST.AD_EX_PORTOEMBARQUE=CAB.AD_EX_PORTOEMBARQUE 
+    AND FMAHST.AD_EX_PORTODESCARGA = CAB.AD_EX_PORTODESCARGA  
+    AND CAB.AD_INCOTERM IN (
+        'CIF',
+    'CIP',
+    'CPT')                              
+LEFT 
+JOIN
+    VW_M_CUSTOMED_SEMANA MSEM 
+        ON TO_CHAR((ROM1.DTENTRADA ),
+    'IW-YYYY')=MSEM.SEMANA_ENTR 
+    AND ITE.CODPRODMP=MSEM.CODPROD 
+    AND (ITE.CALIBER=MSEM.CALIBRE 
+    OR 'MG'=MSEM.CALIBRE)
+LEFT 
+JOIN
+    (
+        
+		    SELECT
+		        CODPROD,
+		        CONTROLEPA,
+		        -- Quantidade real: zera tudo que for COMPLEMENTAR (independente de vir 0 ou 1)
+		        SUM(CASE 
+            WHEN UPPER(DESCROPER) LIKE '%COMPLEMENTAR%' THEN 0
+		                 
+            ELSE QTDNEG
+		            
+        END)                                                  AS QTDNEG_REAL,
+		        -- Valor total: soma original + todos os complementos
+		        SUM(QTDNEG * VLRUNIT)                                     AS VLRTOTAL,
+		        -- Unitário real recalculado pela QTD verdadeira
+		        ROUND(
+		            SUM(QTDNEG * VLRUNIT)
+		            / NULLIF(
+		                SUM(CASE 
+            WHEN UPPER(DESCROPER) LIKE '%COMPLEMENTAR%' THEN 0
+		                         
+            ELSE QTDNEG
+		                    
+        END), 0)
+		        , 4)                                                      AS VLRUNIT,
+		        -- Flags de auditoria
+		        SUM(CASE 
+            WHEN UPPER(DESCROPER) LIKE '%COMPLEMENTAR%'
+		                 THEN QTDNEG * VLRUNIT 
+            ELSE 0 
+        END)                AS VLR_COMPLEMENTO,
+		        MAX(CASE 
+            WHEN UPPER(DESCROPER) LIKE '%COMPLEMENTAR%'
+		                 THEN 'S' 
+            ELSE 'N' 
+        END)                           AS TEM_COMPLEMENTO
+		    
+    FROM
+        ARG_COMPRA_MP
+		    
+    GROUP BY
+        CODPROD,
+        CONTROLEPA
+		) MPE 
+            ON ITE.PRODUCTCODE=MPE.CODPROD 
+            AND ITE.CONTROLE=MPE.CONTROLEPA
+LEFT 
+    JOIN
+        ARG_FRETES_RURALVD FRRU 
+            ON FRRU.CODPROJ = ITE.CODPROJ  
+LEFT 
+    JOIN
+        VW_ARG_DEB_CRE_ITE CD_ITE 
+            ON CD_ITE.CODPROJ=COALESCE(PRJ2.CODPROJ,
+        PRJ.CODPROJ) 
+        AND CD_ITE.CODPROD=ITE.PRODUCTCODE 
+        AND CD_ITE.CONTROLE=ITE.CONTROLE 
+        AND CD_ITE.CT_CL='CT' 
+        AND CD_ITE.AD_CONSCTRL='S'
+LEFT 
+    JOIN
+        VW_ARG_DEB_CRE_ITE CD_ITE2 
+            ON CD_ITE2.CODPROJ=COALESCE(PRJ2.CODPROJ,
+        PRJ.CODPROJ) 
+        AND CD_ITE2.CODPROD=ITE.PRODUCTCODE 
+        AND CD_ITE2.AD_CALIBRE=ITE.CODCALIBRE 
+        AND CD_ITE2.CT_CL='CL' 
+        AND CD_ITE2.AD_CONSCTRL='C'
+LEFT 
+    JOIN
+        TIPO_PARCERIA_LKP TPL
+       
+            ON TPL.CODTIPOPARCERIA = PARPROD.AD_TIPOPARCERIA
+WHERE NVL(ITEO.AD_QTDNEGOR,
+        ITEO.QTDNEG) - NVL(DEVO.V_QTDDEV,
+        0) > 0   --    
+        AND CAB.NUNOTA=157921
+  
+        AND NOT EXISTS (SELECT
+            codproj 
+        FROM
+            AD_NOTASEXC ex 
+        WHERE
+            ex.codproj=ITE.CODPROJ)
+  
+        AND NOT EXISTS (SELECT
+            nunota 
+        FROM
+            AD_NOTASEXC ex 
+        WHERE
+            ex.nunota=cab.nunota)
+  
+        AND NOT EXISTS (SELECT
+            CODPARC 
+        FROM
+            VW_TGFPARC_TGFEMP EP  
+        WHERE
+            EP.CODPARC= CAB.CODPARC)
+  
+        AND (CAB.AD_NUNOTACREF IS NULL)
+  
+        AND NOT EXISTS (SELECT
+            nunota 
+        FROM
+            tgfcab ex1 
+        WHERE
+            ex1.AD_NUNOTASUB=cab.nunota)

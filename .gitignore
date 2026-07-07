@@ -1,0 +1,16 @@
+# Propostas comerciais e material de fornecedor não entram no repositório
+# (dados de preço/contato de vendor — mantidos só localmente até virarem projeto contratado)
+*.pdf
+
+# Rascunhos originais em Word — a fonte versionada é o .md em docs/, não o .docx
+*.docx
+
+# Segredos de conexão (Oracle/Sankhya, GCP) — nunca versionar credencial
+*.env
+application-local.properties
+*.pem
+*.key
+service-account*.json
+
+# Config local do Claude Code — não sobe pro repositório da empresa
+.claude/

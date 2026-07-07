@@ -1,0 +1,137 @@
+CREATE OR REPLACE PROCEDURE         STP_BMC_CARGA_MRG_BI_BASE AS
+  -- Definindo o tamanho do lote para Bulk Collect
+	
+CURSOR c_margem_bi IS
+    SELECT sysdate dhcarga, 
+           'N' ativo, regra, semana, FRUTA, codemp, ano, teste_credit, 
+           teste_debit, sequencia, operacao, processo, qtdpallet, loteargo, 
+           codprodutor, nomeprodutor, nropallet, nome_cliente, tipo_cx, data, 
+           mes, variedade, variedademp, CENTRO_RESULTADO, CODCENTRO, nunota, nf, 
+           moeda, vlr_cotacao, inconterms, codprod, descrprod, RECEITA_BRUTA_MOE, 
+           preco_venda_moeda, custo_mp_caixa, vlr_kg, Peso_Total_Liq, vlr_claim, 
+           codparc, PERCDESCCONTRATUAL, vlrnota, controle, codtipoper, vlrfrete, 
+           tipmov, codproj, NATUREZA, vlr_preco_venda, total_cx, 
+           vlr_receita_bruta_total, desconto_comercial, desconto_contratual, 
+           devolucao_realocacao, devolucao_perda, receita_complementar, 
+           nunota_complementar, RECEITA_FRETE, vlr_outras_dev, vlr_receita_liq1, 
+           colheita, vlr_com_venda_com, vlr_com_venda_terc, CUSTO_IMP_SALDO, 
+           custo_mp, custo_embalagem, frete_rural, custos_diretos_mi, 
+           frete_rodoviario, frete_maritimo, frete_aereo, seguro_cred, 
+           DESP_PORTUARIAS, perda_pack, custos_diretos_me, custos_servicos, 
+           custo_operacao, provisao_fornecedores, custo_calculado, vlr_margem, 
+           custofreteger, custoetiqger, descger, perc_margem, PROVISAO_FORNECEDOR_GER, 
+           CUSTOUNITARIOGER, CUSTOTOTALGER, MARGEMGER, PERCMARGEMGER, status_comercial, 
+           etd, eta, AD_EX_CONTAINER, PORTO_ORIGEM, PORTO_DESTINO, OBSERVACAO, 
+           VESSEL, custo_etiquetagem, pais, prv, ROYALT, VLR_PROV_FORN, VLR_ROYALTIES, 
+           CODPRODCX, DESCRPRODCX, ROMANEIO, NFENTRADAMP, DTENTRADAMP, OBS1, OBS2, 
+           LOSS, STCOM, CLIREALOC, ETDR, ETAR, DEBIT_MOE, CREDIT_MOE, OPEN_AMOUNT, BOOKING, 
+           LINER, DTENTROM,LOC_ENT,TXADM_CUSTO_GER, CUSTOMEDIO, CUSTOTOTALGERC
+      FROM VW_BMC_BI_BASE_ITENS_V9;--VW_BMC_BI_BASE_ITENS;
+
+  -- Coleções PL/SQL para o Bulk Collect
+  TYPE t_margem_bi IS TABLE OF c_margem_bi%ROWTYPE;
+  l_margem_bi t_margem_bi;
+
+  -- Tamanho do lote
+  v_limit CONSTANT PLS_INTEGER := 1000;
+
+BEGIN
+ -- CALL SANKHYA.STP_ARG_UPD_AD_TGFITECOMPL();	
+  -- Apagando tabela temporária VW_M_NFVENDAS_DEVINT
+	
+  DBMS_MVIEW.REFRESH('SANKHYA.VW_M_NFVENDAS_DEVINT', METHOD => 'C');	
+  DBMS_MVIEW.REFRESH('SANKHYA.VW_M_CONTROLE_VLRMP', METHOD => 'C');
+  DBMS_MVIEW.REFRESH('SANKHYA.VW_M_CUSTOMED_SEMANA', METHOD => 'C');
+  
+  EXECUTE IMMEDIATE 'TRUNCATE TABLE AD_NOTASITEMPROMARGEMBI';
+  EXECUTE IMMEDIATE 'TRUNCATE TABLE AD_BMCPRECOENTRADA';
+  
+  -- Inserindo dados na tabela temporária
+  INSERT INTO AD_BMCPRECOENTRADA (NUNOTA, CODPROD, CALIBRE, VLRUNIT, VLRTOT, CONTROLE)
+  SELECT NUNOTA, CODPROD, CALIBRE, VLRUNIT, VLRTOT ,CONTROLE 
+  FROM VW_BMC_GETPRECOENTRADA;
+   COMMIT;
+   SANKHYA.STP_ARG_PROCESS_AD_TGFITECOMPL(); 
+   COMMIT;
+   --DBMS_MVIEW.REFRESH('SANKHYA.VW_NOTAS_30', METHOD => 'C');
+
+  --SANKHYA.STP_ARG_CARGA_AD_REC_COM;
+  -- Usar cursor com Bulk Collect para ler os dados em lotes
+   COMMIT; 
+  OPEN c_margem_bi;
+  LOOP
+    FETCH c_margem_bi BULK COLLECT INTO l_margem_bi LIMIT v_limit;
+    EXIT WHEN l_margem_bi.COUNT = 0;
+
+    -- Inserir os dados em lotes usando FORALL
+    FORALL i IN 1..l_margem_bi.COUNT
+      INSERT INTO AD_NOTASITEMPROMARGEMBI
+        (CODNOTASITEMPROMARGEMBI, DHCARGA, ativo, regra, semana, FRUTA, codemp, ano, 
+         teste_credit, teste_debit, sequencia, operacao, processo, qtdpallet, loteargo, 
+         codprodutor, nomeprodutor, nropallet, nome_cliente, tipo_cx, data, mes, variedade, 
+         variedademp, CENTRO_RESULTADO, CODCENTRO, nunota, nf, moeda, vlr_cotacao, inconterms, 
+         codprod, descrprod, RECEITA_BRUTA_MOE, preco_venda_moeda, custo_mp_caixa, vlr_kg, 
+         Peso_Total_Liq, vlr_claim, codparc, PERCDESCCONTRATUAL, vlrnota, controle, codtipoper, 
+         vlrfrete, tipmov, codproj, NATUREZA, vlr_preco_venda, total_cx, vlr_receita_bruta_total, 
+         desconto_comercial, desconto_contratual, devolucao_realocacao, devolucao_perda, 
+         receita_complementar, nunota_complementar, RECEITA_FRETE, vlr_outras_dev, 
+         vlr_receita_liq1, colheita, vlr_com_venda_com, vlr_com_venda_terc, CUSTO_IMP_SALDO, 
+         custo_mp, custo_embalagem, frete_rural, custos_diretos_mi, frete_rodoviario, 
+         frete_maritimo, frete_aereo, seguro_cred, DESP_PORTUARIAS, perda_pack, custos_diretos_me, 
+         custos_servicos, custo_operacao, provisao_fornecedores, custo_calculado, vlr_margem, 
+         custofreteger, custoetiqger, descger, perc_margem, PROVISAO_FORNECEDOR_GER, CUSTOUNITARIOGER, 
+         CUSTOTOTALGER, MARGEMGER, PERCMARGEMGER, status_comercial, etd, eta, AD_EX_CONTAINER, 
+         PORTO_ORIGEM, PORTO_DESTINO, OBSERVACAO, VESSEL, custo_etiquetagem, pais, prv, ROYALT, 
+         VLR_PROV_FORN, VLR_ROYALTIES, CODPRODCX, DESCRPRODCX, ROMANEIO, NFENTRADAMP, DTENTRADAMP, 
+         OBS1, OBS2, LOSS, STCOM, CLIREALOC, ETDR, ETAR, DEBIT_MOE, CREDIT_MOE, OPEN_AMOUNT, BOOKING, 
+         LINER, DTENTROM,LOC_ENT,TXADM_CUSTO_GER, CUSTOMEDIO,CUSTOTOTALGERC)
+      VALUES
+        (SEQ_NOTASITEMPROMARGEMBI.NEXTVAL, 
+         l_margem_bi(i).dhcarga, l_margem_bi(i).ativo, l_margem_bi(i).regra, l_margem_bi(i).semana, 
+         l_margem_bi(i).FRUTA, l_margem_bi(i).codemp, l_margem_bi(i).ano, l_margem_bi(i).teste_credit, 
+         l_margem_bi(i).teste_debit, l_margem_bi(i).sequencia, l_margem_bi(i).operacao, 
+         l_margem_bi(i).processo, l_margem_bi(i).qtdpallet, l_margem_bi(i).loteargo, 
+         l_margem_bi(i).codprodutor, l_margem_bi(i).nomeprodutor, l_margem_bi(i).nropallet, 
+         l_margem_bi(i).nome_cliente, l_margem_bi(i).tipo_cx, l_margem_bi(i).data, l_margem_bi(i).mes, 
+         l_margem_bi(i).variedade, l_margem_bi(i).variedademp, l_margem_bi(i).CENTRO_RESULTADO, 
+         l_margem_bi(i).CODCENTRO, l_margem_bi(i).nunota, l_margem_bi(i).nf, l_margem_bi(i).moeda, 
+         l_margem_bi(i).vlr_cotacao, l_margem_bi(i).inconterms, l_margem_bi(i).codprod, 
+         l_margem_bi(i).descrprod, l_margem_bi(i).RECEITA_BRUTA_MOE, l_margem_bi(i).preco_venda_moeda, 
+         l_margem_bi(i).custo_mp_caixa, l_margem_bi(i).vlr_kg, l_margem_bi(i).Peso_Total_Liq, 
+         l_margem_bi(i).vlr_claim, l_margem_bi(i).codparc, l_margem_bi(i).PERCDESCCONTRATUAL, 
+         l_margem_bi(i).vlrnota, l_margem_bi(i).controle, l_margem_bi(i).codtipoper, 
+         l_margem_bi(i).vlrfrete, l_margem_bi(i).tipmov, l_margem_bi(i).codproj, l_margem_bi(i).NATUREZA, 
+         l_margem_bi(i).vlr_preco_venda, l_margem_bi(i).total_cx, l_margem_bi(i).vlr_receita_bruta_total, 
+         l_margem_bi(i).desconto_comercial, l_margem_bi(i).desconto_contratual, 
+         l_margem_bi(i).devolucao_realocacao, l_margem_bi(i).devolucao_perda, l_margem_bi(i).receita_complementar, 
+         l_margem_bi(i).nunota_complementar, l_margem_bi(i).RECEITA_FRETE, l_margem_bi(i).vlr_outras_dev, 
+         l_margem_bi(i).vlr_receita_liq1, l_margem_bi(i).colheita, l_margem_bi(i).vlr_com_venda_com, 
+         l_margem_bi(i).vlr_com_venda_terc, l_margem_bi(i).CUSTO_IMP_SALDO, l_margem_bi(i).custo_mp, 
+         l_margem_bi(i).custo_embalagem, l_margem_bi(i).frete_rural, l_margem_bi(i).custos_diretos_mi, 
+         l_margem_bi(i).frete_rodoviario, l_margem_bi(i).frete_maritimo, l_margem_bi(i).frete_aereo, 
+         l_margem_bi(i).seguro_cred, l_margem_bi(i).DESP_PORTUARIAS, l_margem_bi(i).perda_pack, 
+         l_margem_bi(i).custos_diretos_me, l_margem_bi(i).custos_servicos, l_margem_bi(i).custo_operacao, 
+         l_margem_bi(i).provisao_fornecedores, l_margem_bi(i).custo_calculado, l_margem_bi(i).vlr_margem, 
+         l_margem_bi(i).custofreteger, l_margem_bi(i).custoetiqger, l_margem_bi(i).descger, l_margem_bi(i).perc_margem, 
+         l_margem_bi(i).PROVISAO_FORNECEDOR_GER, l_margem_bi(i).CUSTOUNITARIOGER, l_margem_bi(i).CUSTOTOTALGER, 
+         l_margem_bi(i).MARGEMGER, l_margem_bi(i).PERCMARGEMGER, l_margem_bi(i).status_comercial, 
+         l_margem_bi(i).etd, l_margem_bi(i).eta, l_margem_bi(i).AD_EX_CONTAINER, l_margem_bi(i).PORTO_ORIGEM, 
+         l_margem_bi(i).PORTO_DESTINO, l_margem_bi(i).OBSERVACAO, l_margem_bi(i).VESSEL, l_margem_bi(i).custo_etiquetagem, 
+         l_margem_bi(i).pais, l_margem_bi(i).prv, l_margem_bi(i).ROYALT, l_margem_bi(i).VLR_PROV_FORN, 
+         l_margem_bi(i).VLR_ROYALTIES, l_margem_bi(i).CODPRODCX, l_margem_bi(i).DESCRPRODCX, l_margem_bi(i).ROMANEIO, 
+         l_margem_bi(i).NFENTRADAMP, l_margem_bi(i).DTENTRADAMP, l_margem_bi(i).OBS1, l_margem_bi(i).OBS2, 
+         l_margem_bi(i).LOSS, l_margem_bi(i).STCOM, l_margem_bi(i).CLIREALOC, l_margem_bi(i).ETDR, l_margem_bi(i).ETAR, 
+         l_margem_bi(i).DEBIT_MOE, l_margem_bi(i).CREDIT_MOE,l_margem_bi(i).OPEN_AMOUNT, l_margem_bi(i).BOOKING, 
+         l_margem_bi(i).LINER,l_margem_bi(i).DTENTROM,l_margem_bi(i).LOC_ENT,l_margem_bi(i).TXADM_CUSTO_GER,
+         l_margem_bi(i).CUSTOMEDIO,l_margem_bi(i).CUSTOTOTALGERC);
+
+  END LOOP;
+  CLOSE c_margem_bi;
+
+  -- Exclusão e atualização de registros
+  DELETE FROM AD_NOTASITEMPROMARGEMBI WHERE ATIVO = 'S';
+  COMMIT;
+  UPDATE AD_NOTASITEMPROMARGEMBI SET ATIVO = 'S' WHERE ATIVO = 'N';
+  COMMIT;
+END STP_BMC_CARGA_MRG_BI_BASE;
+/
