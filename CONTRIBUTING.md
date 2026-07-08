@@ -35,7 +35,9 @@ Toda alteração em `sql/` → atualizar a seção correspondente em `docs/STACK
 12. Sugestões de melhoria
 13. Resumo executivo (para analista funcional)
 
-Depois de documentar, registrar uma entrada datada no `CHANGELOG.md`. Sem exceção — um `.sql`/`.txt` em `sql/` sem a seção correspondente em `docs/` é documentação desatualizada.
+Depois de documentar, registrar uma entrada datada no `CHANGELOG.md`. Sem exceção — um `.sql`/`.txt` em `sql/` sem a seção correspondente em `docs/` é documentação desatualizada. `scripts/check_docs_coverage.py` verifica isso automaticamente (roda no CI via `.github/workflows/docs-coverage.yml` em todo PR que toque `sql/` ou `docs/STACK_MARGEM_BI.md`) — falha o PR se algum objeto ficar sem seção. Rodar localmente: `python3 scripts/check_docs_coverage.py`.
+
+`[VALIDAR]`/ponto crítico novo descoberto ao documentar → além de registrar na seção do objeto, adicionar uma linha em `docs/RISCOS_ABERTOS.md` (consolidação de todos os riscos abertos do stack). Esse arquivo não é atualizado sozinho — quem encontra ou resolve um risco é quem mantém a linha.
 
 Passo a passo completo (como localizar o objeto no Sankhya, extrair o corpo, salvar, documentar e atualizar referências cruzadas): `skills/trazer-documentar-objeto/SKILL.md`.
 

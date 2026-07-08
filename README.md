@@ -28,6 +28,9 @@ CHANGELOG.md         — log de progresso datado (✅ Confirmado / ⚠️ Pendê
 docs/
   STACK_MARGEM_BI.md                 — doc técnica objeto a objeto (Resumo, Fluxo, Entradas, Saídas, Regras de negócio, Cálculos, Dependências...)
   REVISAO_TECNICA_STACK_MARGEM_BI.md — revisão de performance/otimização
+  FLUXOS.md                          — diagramas (Mermaid): linhagem de dados, execução da carga, grafo de dependências, CTEs da VW_NOTAS_31, arquitetura futura GCP, fluxos de trabalho
+  RISCOS_ABERTOS.md                  — todo [VALIDAR]/ponto crítico ativo, consolidado num só lugar (não substitui as seções originais)
+  GLOSSARIO.md                       — termos/siglas de domínio, os 26 objetos em uma frase, dicionário das colunas finais do painel
   adr/                                — decisões arquiteturais registradas (Architecture Decision Records)
 sql/
   procedures/*.sql   — corpo real (CREATE OR REPLACE) de cada procedure Sankhya
@@ -36,7 +39,11 @@ sql/
 skills/
   bi-impact-check/            — checklist obrigatório antes de mexer em algo que alimenta o BI
   trazer-documentar-objeto/   — passo a passo pra trazer um objeto novo do Sankhya e documentá-lo
+scripts/
+  check_docs_coverage.py — falha se um objeto novo em sql/ não tiver seção correspondente em docs/ (roda no CI, ver .github/workflows/docs-coverage.yml)
 ```
+
+> Nota: os dois arquivos em `skills/` acima estão referenciados aqui e em `CONTRIBUTING.md`/`ARCHITECTURE.md`, mas **não existem hoje no working tree** — foram apagados por um commit acidental (`aa50339`, 07/07/2026). Ficam recuperáveis via `git checkout ce3f439 -- skills/`. Decisão de restaurar ou não é do time — ver `docs/FLUXOS.md`, seção "Achados desta rodada de revisão".
 
 ## Regra de ouro
 

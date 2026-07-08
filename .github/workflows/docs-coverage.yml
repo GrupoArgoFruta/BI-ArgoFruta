@@ -1,0 +1,25 @@
+name: Cobertura de documentação (sql/ × docs/)
+
+on:
+  pull_request:
+    paths:
+      - "sql/**"
+      - "docs/STACK_MARGEM_BI.md"
+      - "docs/REVISAO_TECNICA_STACK_MARGEM_BI.md"
+  push:
+    branches: [main]
+    paths:
+      - "sql/**"
+      - "docs/STACK_MARGEM_BI.md"
+      - "docs/REVISAO_TECNICA_STACK_MARGEM_BI.md"
+
+jobs:
+  check-docs-coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Verifica se todo objeto em sql/ tem seção em docs/
+        run: python3 scripts/check_docs_coverage.py

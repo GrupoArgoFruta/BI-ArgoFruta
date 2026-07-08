@@ -29,7 +29,7 @@ VW_NOTAS_31                 (view base — camada de coleta de notas/itens)
 TGFCAB / AD_TGFITECOMPL / TGFITE / ...  (dados transacionais Sankhya)
 ```
 
-Documentação técnica completa, objeto a objeto (Resumo, Fluxo, Entradas, Saídas, Regras de negócio, Cálculos, Dependências...): `docs/STACK_MARGEM_BI.md`. Revisão de performance/otimização: `docs/REVISAO_TECNICA_STACK_MARGEM_BI.md`.
+Documentação técnica completa, objeto a objeto (Resumo, Fluxo, Entradas, Saídas, Regras de negócio, Cálculos, Dependências...): `docs/STACK_MARGEM_BI.md`. Revisão de performance/otimização: `docs/REVISAO_TECNICA_STACK_MARGEM_BI.md`. Diagramas (linhagem de dados, execução da carga, grafo de dependências dos 26 objetos, CTEs da VW_NOTAS_31, arquitetura futura GCP): `docs/FLUXOS.md`.
 
 ## Stack futura (proposta, ainda não contratada)
 
@@ -51,5 +51,7 @@ Isso é plano, não código — não assumir que existe até confirmação de qu
 - `BULK COLLECT` de 1000 sem `SAVE EXCEPTIONS` — um erro de dado numa linha aborta o lote inteiro.
 - Na view V9, vários indicadores de margem (`CUSTOTOTALGER`, `MARGEMGER`, `PERCMARGEMGER`, `PROVISAO_FORNECEDOR_GER`) são calculados em **dois níveis diferentes** (N2 e projeção externa) com fórmulas distintas — fonte recorrente de confusão sobre "qual valor é o de verdade" (é o da camada externa).
 - Reescrita da V9 (maior gargalo, ~57% do tempo de carga) ainda não iniciada — depende de ambiente de homologação ou deploy paralelo (`_V10`) antes de ir pra produção.
+
+Todos os pontos acima (e os demais `[VALIDAR]` espalhados pelas 26 seções de objeto) estão consolidados, com prioridade, em `docs/RISCOS_ABERTOS.md`. Glossário de termos de domínio e dicionário das colunas finais do painel: `docs/GLOSSARIO.md`.
 
 Decisões arquiteturais registradas: `docs/adr/`.
